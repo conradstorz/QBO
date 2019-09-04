@@ -113,15 +113,6 @@ from dateutil.parser import parse
 from hashids import Hashids
 
 
-# establish logging state
-FORMAT = "%(asctime)-15s %(clientip)s %(user)-8s %(message)s"
-logging.basicConfig(format=FORMAT, level=logging.INFO)
-d = {"clientip": "xxx.xxx.xxx.xxx", "user": "qbo_loggs"}
-
-# declare program start
-logging.info("Program Start: %s", "nominal", extra=d)
-
-
 def Fix_date(string):
     """Fix_date(time in any format)
     return date in quickbooks qbo format
@@ -137,6 +128,7 @@ def hashID(string):
     passes strings representing dollar values so amounts are multiplied by 100
     to achieve an integer value in pennies.
     """
+
 #   Here in csv2qbo.py I need to create an ID for quickbooks to identify
 #   each transaction and if these IDs are not unique they are considered duplicates.
 #   An early iteration of csv2qbo.py used date and time plus memo as the ID. This would
@@ -149,9 +141,20 @@ def hashID(string):
 #   when I might happen to download CSV files that overlap previous CSV file downloads already
 #   imported into quickbooks. An earlier implemntation used a random NONCE inserted into the 
 #   ID string but this was not repeatable over different CSV downloads.
+
     hashids = Hashids()  # create an instance of the module object
     cleaned = string.replace(",", "")  # remove any commas
     return hashids.encode(int(float(cleaned.strip("$")) * 100))
+
+
+# establish logging state
+FORMAT = "%(asctime)-15s %(clientip)s %(user)-8s %(message)s"
+logging.basicConfig(format=FORMAT, level=logging.INFO)
+d = {"clientip": "xxx.xxx.xxx.xxx", "user": "qbo_loggs"}
+# logging.warning('Protocol problem: %s', 'connection reset', extra=d)
+
+# declare program start
+logging.info("Program Start: %s", "nominal", extra=d)
 
 
 def read_csv_file(base_file):
@@ -254,10 +257,14 @@ def convert_csv_file(lines, text):
 
     qbo_file_lines = []
     qbo_file_lines.append(qbo_file_header)
+
+    # qbo_file_lines.append()
+    # print(lines)
     not_posted = True
     posted_xacts = []
     for line in lines:  # first strip unwanted headers and pending xacts
-        if not_posted:  # file includes non-posted xacts, discard.
+        # print(line)
+        if not_posted:
             logging.debug(f'not_posted: {", ".join(line)}', extra=d)
             if line[0] == "Posted Transactions":
                 not_posted = False
