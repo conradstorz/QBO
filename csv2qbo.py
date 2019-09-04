@@ -3,11 +3,15 @@ initial version compatible with schwab.com checking csv downloads
 """
 # csv2qbo / Modify csv bank downloads into qbo file format
 
+from pathlib import Path
+home = str(Path.home()) # gather the home directory
+
+
 # files to be updated
 base_file_extension = ".csv"
 filename = "download.csv"
-basedirectory = "./Downloads/"
-outputdirectory = "./Documents/"
+basedirectory = home + "/Downloads/"
+outputdirectory = home + "/Documents/"
 output_file_extension = ".qbo"
 
 # header line for schwab.com downloads
@@ -324,7 +328,7 @@ if __name__ == "__main__":
         originalfile = read_csv_file(file_path)
 
         if originalfile == []:
-            logging.info("File not yet found %s" % file_path, extra=d)
+            logging.info("File not yet found %s. sleeping 10 seconds..." % file_path, extra=d)
             time.sleep(10)
         else:
             # we have a file, try to process
