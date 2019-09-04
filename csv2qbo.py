@@ -163,7 +163,7 @@ def hashID(string):
 # logger.warning('Protocol problem: %s', 'connection reset')
 
 # declare program start
-logger.info("Program Start: %s", "nominal")
+logger.info("Program Start: %s" % "nominal")
 
 @logger.catch
 def read_csv_file(base_file):
@@ -179,7 +179,7 @@ def read_csv_file(base_file):
                 csv_output.append(row)
 
     except Exception as e:
-        logger.error("Error in reading %s", base_file)
+        logger.error("Error in reading " + base_file)
         logger.warning(str(e))
 
     if csv_lines != []:
@@ -338,7 +338,7 @@ def Main():
                 with open(cf, "w") as f:
                     f.writelines(result)
             except Exception as e:
-                logger.error("Error in writing %s", cf)
+                logger.error("Error in writing %s" % cf)
                 logger.warning(str(e))
                 sys.exit(1)
 
@@ -350,9 +350,7 @@ def Main():
                 try:
                     os.remove(file_path)
                 except OSError as e:
-                    logger.warning(
-                        "Error: %s - %s." % (e.file_path, e.strerror), extra=d
-                    )
+                    logger.warning("Error: %s - %s." % (e.file_path, e.strerror))
                     sys.exit(1)
                 logger.info("Success removing %s" % file_path)
 
@@ -360,7 +358,7 @@ def Main():
                 logger.info("Sorry, I can not find %s file." % file_path)
 
             # declare program end
-            logger.info("Program End: %s", "nominal")
+            logger.info("Program End: %s" % "nominal")
             sys.exit(0)
     return
 
