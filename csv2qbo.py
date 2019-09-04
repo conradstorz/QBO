@@ -313,10 +313,7 @@ def convert_csv_file(lines, text):
     return qbo_file_lines
 
 
-"""Check if this file is being run directly
-"""
-if __name__ == "__main__":
-    # Run the processes as that seems to be the purpose
+def Main():
     while True:
         # loop until something to process is found
         logging.info("...checking download directory...", extra=d)
@@ -366,3 +363,12 @@ if __name__ == "__main__":
             # declare program end
             logging.info("Program End: %s", "nominal", extra=d)
             sys.exit(0)
+    return
+
+
+"""Check if this file is being run directly
+"""
+if __name__ == "__main__":
+    # Run the processes as that seems to be the purpose
+    Main()
+    
