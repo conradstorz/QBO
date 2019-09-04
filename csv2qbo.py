@@ -10,6 +10,9 @@ basedirectory = "./Downloads/"
 outputdirectory = "./Documents/"
 output_file_extension = ".qbo"
 
+# header line for schwab.com downloads
+schwabHeader = "Transactions  for Checking account XXXXXX-090258"
+
 # qbo file boilerplate
 qbo_file_header = """
 OFXHEADER:100
@@ -132,18 +135,18 @@ def hashID(string):
     to achieve an integer value in pennies.
     """
 
-#   Here in csv2qbo.py I need to create an ID for quickbooks to identify
-#   each transaction and if these IDs are not unique they are considered duplicates.
-#   An early iteration of csv2qbo.py used date and time plus memo as the ID. This would
-#   normally have worked but for a time when multiple otherwise identical transactions
-#   appeared on the same buisness day. I realized the only unique information i had 
-#   available was the banks own running balance that they report along with each transaction.
-#   I had been discarding that value since it served me no purpose. I decided to hash it to 
-#   obfuscate the meaning while creating an ID that was repeateable on seperate runs of the
-#   utility against CSV files from the bank. This helps eliminate TRUE duplicates from quickbooks
-#   when I might happen to download CSV files that overlap previous CSV file downloads already
-#   imported into quickbooks. An earlier implemntation used a random NONCE inserted into the 
-#   ID string but this was not repeatable over different CSV downloads.
+    #   Here in csv2qbo.py I need to create an ID for quickbooks to identify
+    #   each transaction and if these IDs are not unique they are considered duplicates.
+    #   An early iteration of csv2qbo.py used date and time plus memo as the ID. This would
+    #   normally have worked but for a time when multiple otherwise identical transactions
+    #   appeared on the same buisness day. I realized the only unique information i had
+    #   available was the banks own running balance that they report along with each transaction.
+    #   I had been discarding that value since it served me no purpose. I decided to hash it to
+    #   obfuscate the meaning while creating an ID that was repeateable on seperate runs of the
+    #   utility against CSV files from the bank. This helps eliminate TRUE duplicates from quickbooks
+    #   when I might happen to download CSV files that overlap previous CSV file downloads already
+    #   imported into quickbooks. An earlier implemntation used a random NONCE inserted into the
+    #   ID string but this was not repeatable over different CSV downloads.
 
     hashids = Hashids()  # create an instance of the module object
     cleaned = string.replace(",", "")  # remove any commas
