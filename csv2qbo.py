@@ -1,3 +1,6 @@
+""" file csv2qbo.py
+initial version compatible with schwab.com checking csv downloads
+"""
 # csv2qbo / Modify csv bank downloads into qbo file format
 
 # files to be updated
