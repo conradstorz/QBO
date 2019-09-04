@@ -5,6 +5,14 @@ initial version compatible with schwab.com checking csv downloads
 
 from pathlib import Path
 home = str(Path.home()) # gather the home directory
+import os
+import re
+import csv
+import sys
+import time
+from loguru import logger
+from dateutil.parser import parse
+from hashids import Hashids
 
 
 # files to be updated
@@ -113,16 +121,7 @@ file_date = ""
 acct_number_tag = "<ACCTID>"
 acct_number = ""
 
-import os
-import re
-import csv
-import sys
-import time
-import logging
-from dateutil.parser import parse
-from hashids import Hashids
-
-
+@logger.catch
 def Fix_date(string):
     """Fix_date(time in any format)
     return date in quickbooks qbo format
@@ -130,7 +129,7 @@ def Fix_date(string):
     dt = parse(string)
     return dt.strftime("%Y%m%d")
 
-
+@logger.catch
 def hashID(string):
     """hashID(string representation of a number)
     return a hash of the value represented by string
@@ -157,16 +156,16 @@ def hashID(string):
     return hashids.encode(int(float(cleaned.strip("$")) * 100))
 
 
-# establish logging state
-FORMAT = "%(asctime)-15s %(clientip)s %(user)-8s %(message)s"
-logging.basicConfig(format=FORMAT, level=logging.INFO)
-d = {"clientip": "xxx.xxx.xxx.xxx", "user": "qbo_loggs"}
-# logging.warning('Protocol problem: %s', 'connection reset', extra=d)
+# establish logger state
+#FORMAT = "%(asctime)-15s %(clientip)s %(user)-8s %(message)s"
+#logger.basicConfig(format=FORMAT, level=logger.INFO)
+#d = {"clientip": "xxx.xxx.xxx.xxx", "user": "qbo_loggs"}
+# logger.warning('Protocol problem: %s', 'connection reset')
 
 # declare program start
-logging.info("Program Start: %s", "nominal", extra=d)
+logger.info("Program Start: %s", "nominal")
 
-
+@logger.catch
 def read_csv_file(base_file):
     """read_base_file(fully qualified filename)
     Return a list of lines contained in base_file.
@@ -180,16 +179,16 @@ def read_csv_file(base_file):
                 csv_output.append(row)
 
     except Exception as e:
-        logging.error("Error in reading %s", base_file, extra=d)
-        logging.warning(str(e), extra=d)
+        logger.error("Error in reading %s", base_file)
+        logger.warning(str(e))
 
     if csv_lines != []:
-        logging.debug(csv_lines, extra=d)
-        logging.info("File csv lines read successfully.", extra=d)
+        logger.debug(csv_lines)
+        logger.info("File csv lines read successfully.")
 
     return csv_output
 
-
+@logger.catch
 def Clean_Line(text_list, line):
     """Clean_Line(text list to be removed, text to have modified)
     Return line with redundant spaces removed and text deleted if exists.
@@ -198,12 +197,12 @@ def Clean_Line(text_list, line):
     for t in text_list:
         # remove each occurance from new_line
         new_line = re.sub(t, "", new_line)
-        logging.debug(new_line, extra=d)
+        logger.debug(new_line)
     return (
         new_line.strip()
     )  # returns line without leading or trailing whitespace or newline
 
-
+@logger.catch
 def create_qbo_statement_block(xact):
     """create_qbo_statement_block(xact in form of a list)
         convert csv row in the form of:
@@ -252,7 +251,7 @@ def create_qbo_statement_block(xact):
     formatted_transaction.append("</STMTTRN>" + "\n")
     return formatted_transaction
 
-
+@logger.catch
 def convert_csv_file(lines, text):
     """convert_csv_file(list of lines, list of text strings to remove)
     Remove unwanted text from transaction data from bank download in quickbooks format.
@@ -275,14 +274,14 @@ def convert_csv_file(lines, text):
     for line in lines:  # first strip unwanted headers and pending xacts
         # print(line)
         if not_posted:
-            logging.debug(f'not_posted: {", ".join(line)}', extra=d)
+            logger.debug(f'not_posted: {", ".join(line)}')
             if line[0] == "Posted Transactions":
                 not_posted = False
         else:
-            logging.debug(f'posted: {", ".join(line)}', extra=d)
+            logger.debug(f'posted: {", ".join(line)}')
             posted_xacts.append(line)
     if posted_xacts == []:
-        logging.info("No POSTED transactions found.", extra=d)
+        logger.info("No POSTED transactions found.")
         return qbo_file_lines
 
     # print(posted_xacts)
@@ -312,11 +311,11 @@ def convert_csv_file(lines, text):
 
     return qbo_file_lines
 
-
+@logger.catch
 def Main():
     while True:
         # loop until something to process is found
-        logging.info("...checking download directory...", extra=d)
+        logger.info("...checking download directory...")
         for name in os.listdir(basedirectory):
             if name.endswith(base_file_extension):
                 print(name)
@@ -325,7 +324,7 @@ def Main():
         originalfile = read_csv_file(file_path)
 
         if originalfile == []:
-            logging.info("File not yet found %s. sleeping 10 seconds..." % file_path, extra=d)
+            logger.info("File not yet found %s. sleeping 10 seconds..." % file_path)
             time.sleep(10)
         else:
             # we have a file, try to process
@@ -339,29 +338,29 @@ def Main():
                 with open(cf, "w") as f:
                     f.writelines(result)
             except Exception as e:
-                logging.error("Error in writing %s", cf, extra=d)
-                logging.warning(str(e), extra=d)
+                logger.error("Error in writing %s", cf)
+                logger.warning(str(e))
                 sys.exit(1)
 
-            logging.info("File %s contents written successfully." % cf, extra=d)
+            logger.info("File %s contents written successfully." % cf)
 
-            logging.info("Attempting to remove old %s file..." % file_path, extra=d)
+            logger.info("Attempting to remove old %s file..." % file_path)
 
             if os.path.exists(file_path):
                 try:
                     os.remove(file_path)
                 except OSError as e:
-                    logging.warning(
+                    logger.warning(
                         "Error: %s - %s." % (e.file_path, e.strerror), extra=d
                     )
                     sys.exit(1)
-                logging.info("Success removing %s" % file_path, extra=d)
+                logger.info("Success removing %s" % file_path)
 
             else:
-                logging.info("Sorry, I can not find %s file." % file_path, extra=d)
+                logger.info("Sorry, I can not find %s file." % file_path)
 
             # declare program end
-            logging.info("Program End: %s", "nominal", extra=d)
+            logger.info("Program End: %s", "nominal")
             sys.exit(0)
     return
 
