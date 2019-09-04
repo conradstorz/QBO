@@ -5,7 +5,10 @@ initial version compatible with schwab.com checking csv downloads
 
 from pathlib import Path
 home = str(Path.home()) # gather the home directory
+
 import os
+runtime_name = os.path.basename(__file__)
+
 import re
 import csv
 import sys
@@ -313,6 +316,17 @@ def convert_csv_file(lines, text):
 
 @logger.catch
 def Main():
+    logger.configure(
+        handlers=[{"sink": os.sys.stderr, "level": "DEBUG"}]
+    )  # this method automatically suppresses the default handler to modify the message level
+ 
+    logger.add(
+        runtime_name + "_{time}.log", level="DEBUG"
+    )  # create a new log file for each run of the program
+
+    logger.info("Program Start.")  # log the start of the program
+    logger.info(runtime_name)
+
     while True:
         # loop until something to process is found
         logger.info("...checking download directory...")
