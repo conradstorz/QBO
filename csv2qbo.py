@@ -16,6 +16,7 @@ import time
 from loguru import logger
 from dateutil.parser import parse
 from hashids import Hashids
+from QBO_boilerplate import *
 
 
 # files to be updated
@@ -28,101 +29,6 @@ output_file_extension = ".qbo"
 # header line for schwab.com downloads
 schwabHeader = "Transactions  for Checking account XXXXXX-090258"
 
-# qbo file boilerplate
-qbo_file_header = """
-OFXHEADER:100
-DATA:OFXSGML
-VERSION:102
-SECURITY:NONE
-ENCODING:USASCII
-CHARSET:1252
-COMPRESSION:NONE
-OLDFILEUID:NONE
-NEWFILEUID:NONE
-<OFX>
-<SIGNONMSGSRSV1>
-<SONRS>
-<STATUS>
-<CODE>0
-<SEVERITY>INFO
-</STATUS>
-"""
-qbo_file_date_header = "<DTSERVER>"
-qbo_DTSERVER_date = ""  # to be extracted from csv file
-qbo_DTSERVER_time = "120000[-6:CST]"
-qbo_file_bank_id_boilerplate = """
-<LANGUAGE>ENG
-<FI>
-<ORG>FundsXpress, Inc
-<FID>19953
-</FI>
-<INTU.BID>19953
-</SONRS>
-</SIGNONMSGSRSV1>
-<BANKMSGSRSV1>
-<STMTTRNRS>
-<TRNUID>0
-<STATUS>
-<CODE>0
-<SEVERITY>INFO
-</STATUS>
-<STMTRS>
-<CURDEF>USD
-<BANKACCTFROM>
-<BANKID>121202211
-<ACCTID>440024090258
-<ACCTTYPE>CHECKING
-</BANKACCTFROM>
-<BANKTRANLIST>
-"""
-qbo_DTSTART_date = "<DTSTART>"  # to be appended with actual date
-qbo_DTEND_date = "<DTEND>"  # to be appended with actual date
-sample_qbo_statement_format = """
-<STMTTRN>
-<TRNTYPE>DEBIT
-<DTPOSTED>20181210120000
-<TRNAMT>-490
-<FITID>12102018-490AC-BANK OF AMERICA 
-<NAME>BANK OF AMERICA -ONLINE PMT
-<MEMO>BANK OF AMERICA -ONLINE PMT
-</STMTTRN>
-"""
-qbo_xact_start = "<STMTTRN>"
-qbo_xact_end = "</STMTTRN>"
-qbo_xact_debit_tag = "<TRNTYPE>DEBIT"
-qbo_xact_credit_tag = "<TRNTYPE>CREDIT"
-qbo_xact_amount = (
-    "<TRNAMT>"
-)  # actual amoumt to be appended (negative sign in front of debits)
-qbo_xact_unique_id = (
-    "<FITID>"
-)  # +date+amount+index+memo (maximum 31 characters) (index is a nonce)
-nonce_index = 4095  # 3 digit hex counter counting down from 4095(fff)
-qbo_xact_memo = "<MEMO>"  # +up to 64 characters
-qbo_xact_name = "<NAME>"  # + nomore than 31 characters
-qbo_file_final_boilerplate = """
-</BANKTRANLIST>
-<LEDGERBAL>
-<BALAMT>0
-<DTASOF>20181231000000.000[-6:CST]
-</LEDGERBAL>
-<AVAILBAL>
-<BALAMT>0
-<DTASOF>20181231000000.000[-6:CST]
-</AVAILBAL>
-</STMTRS>
-</STMTTRNRS>
-</BANKMSGSRSV1>
-</OFX>
-"""
-
-# text to remove from transaction descriptions
-bad_text = [r"DEBIT +\d{4}", "CKCD ", "AC-", "POS ", "POS DB "]
-
-qbo_file_date_tag = "<DTEND>"
-file_date = ""
-acct_number_tag = "<ACCTID>"
-acct_number = ""
 
 @logger.catch
 def Fix_date(string):
@@ -255,8 +161,8 @@ def create_qbo_statement_block(xact):
     return formatted_transaction
 
 @logger.catch
-def convert_csv_file(lines, text):
-    """convert_csv_file(list of lines, list of text strings to remove)
+def convert_schwab_csv_file(lines, text):
+    """convert_schwab_csv_file(list of lines, list of text strings to remove)
     Remove unwanted text from transaction data from bank download in quickbooks format.
     This routine takes csv transactions from Schwab bank and outputs a QBO compatible file.
     csv file posted transaction lines have the following header:
@@ -314,8 +220,9 @@ def convert_csv_file(lines, text):
 
     return qbo_file_lines
 
+
 @logger.catch
-def Main():
+def defineLoggers():
     logger.configure(
         handlers=[{"sink": os.sys.stderr, "level": "DEBUG"}]
     )  # this method automatically suppresses the default handler to modify the message level
@@ -323,18 +230,29 @@ def Main():
     logger.add(
         runtime_name + "_{time}.log", level="DEBUG"
     )  # create a new log file for each run of the program
+    return
 
+
+@logger.catch
+def getFileList(target_directory, base_Extension):
+    names = os.listdir(target_directory)  
+    for name in names:
+        if name.endswith(base_Extension):
+            logger.debug(name)
+    return names
+
+
+@logger.catch
+def Main():
+    defineLoggers()
     logger.info("Program Start.")  # log the start of the program
     logger.info(runtime_name)
 
     while True:
         # loop until something to process is found
         logger.info("...checking download directory...")
-        for name in os.listdir(basedirectory):
-            if name.endswith(base_file_extension):
-                print(name)
+        files = getFileList(basedirectory, base_file_extension)
         file_path = os.path.join(basedirectory, filename)
-
         originalfile = read_csv_file(file_path)
 
         if originalfile == []:
@@ -342,8 +260,9 @@ def Main():
             time.sleep(10)
         else:
             # we have a file, try to process
-            result = convert_csv_file(originalfile, bad_text)
+            result = convert_schwab_csv_file(originalfile, bad_text)
             if result == []:
+                logger.error("Failed to convert:  %s" % originalfile)
                 sys.exit(1)
 
             # Attempt to write results to cleanfile
