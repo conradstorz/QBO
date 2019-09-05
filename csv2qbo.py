@@ -364,7 +364,7 @@ def Main():
                 try:
                     os.remove(file_path)
                 except OSError as e:
-                    logger.warning("Error: %s - %s." % (e.file_path, e.strerror))
+                    logger.warning("Error: %s." % e)
                     sys.exit(1)
                 logger.info("Success removing %s" % file_path)
 
