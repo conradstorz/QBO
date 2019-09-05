@@ -1,0 +1,136 @@
+2019-09-04 22:22:32.220 | INFO     | __main__:Main:289 - Program Start.
+2019-09-04 22:22:32.220 | INFO     | __main__:Main:290 - csv2qbo.py
+2019-09-04 22:22:32.220 | INFO     | __main__:Main:294 - ...checking download directory...
+2019-09-04 22:22:32.220 | DEBUG    | __main__:getFileList:241 - 090258_Checking_Transactions_20190107-195212.csv
+2019-09-04 22:22:32.220 | DEBUG    | __main__:getFileList:241 - Coinbase-533abce993be6498e5000366-TaxTransactionsReport-2019-03-11-22_21_35.csv
+2019-09-04 22:22:32.220 | DEBUG    | __main__:getFileList:241 - Coinbase-BATWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:32.220 | DEBUG    | __main__:getFileList:241 - Coinbase-BCHWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:32.220 | DEBUG    | __main__:getFileList:241 - Coinbase-BitcoinWallet-TaxReport-2019-03-11-22_20_00.csv
+2019-09-04 22:22:32.236 | DEBUG    | __main__:getFileList:241 - Coinbase-BSVWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:32.236 | DEBUG    | __main__:getFileList:241 - Coinbase-Conrad'sVault-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:32.236 | DEBUG    | __main__:getFileList:241 - Coinbase-ETCWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:32.236 | DEBUG    | __main__:getFileList:241 - Coinbase-Ethericwallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:32.236 | DEBUG    | __main__:getFileList:241 - Coinbase-ETHWallet-TaxReport-2019-03-11-22_20_00.csv
+2019-09-04 22:22:32.236 | DEBUG    | __main__:getFileList:241 - Coinbase-LTCWallet-TaxReport-2019-03-11-22_20_00.csv
+2019-09-04 22:22:32.236 | DEBUG    | __main__:getFileList:241 - Coinbase-USDCWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:32.236 | DEBUG    | __main__:getFileList:241 - Coinbase-XRPWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:32.236 | DEBUG    | __main__:getFileList:241 - Coinbase-ZECWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:32.236 | DEBUG    | __main__:getFileList:241 - Coinbase-ZRXWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:32.236 | DEBUG    | __main__:getFileList:241 - contacts.csv
+2019-09-04 22:22:32.236 | DEBUG    | __main__:getFileList:241 - PAI_bankDeposits_sample.csv
+2019-09-04 22:22:32.236 | DEBUG    | __main__:getFileList:241 - PAI_DailyDeposits_sample.csv
+2019-09-04 22:22:32.251 | DEBUG    | __main__:getFileList:241 - Reports-04-08-2019-00_00_00-to-04-08-2019-23_59_59.csv
+2019-09-04 22:22:32.255 | DEBUG    | __main__:getFileList:241 - Reports-05-06-2019-00_00_00-to-05-09-2019-23_59_59.csv
+2019-09-04 22:22:32.256 | ERROR    | __main__:read_csv_file:91 - Error in reading C:\Users\Conrad/Downloads/download.csv
+2019-09-04 22:22:32.258 | WARNING  | __main__:read_csv_file:92 - [Errno 2] No such file or directory: 'C:\\Users\\Conrad/Downloads/download.csv'
+2019-09-04 22:22:32.259 | INFO     | __main__:Main:300 - File not yet found C:\Users\Conrad/Downloads/download.csv. sleeping 10 seconds...
+2019-09-04 22:22:42.272 | INFO     | __main__:Main:294 - ...checking download directory...
+2019-09-04 22:22:42.272 | DEBUG    | __main__:getFileList:241 - 090258_Checking_Transactions_20190107-195212.csv
+2019-09-04 22:22:42.272 | DEBUG    | __main__:getFileList:241 - Coinbase-533abce993be6498e5000366-TaxTransactionsReport-2019-03-11-22_21_35.csv
+2019-09-04 22:22:42.272 | DEBUG    | __main__:getFileList:241 - Coinbase-BATWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:42.272 | DEBUG    | __main__:getFileList:241 - Coinbase-BCHWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:42.272 | DEBUG    | __main__:getFileList:241 - Coinbase-BitcoinWallet-TaxReport-2019-03-11-22_20_00.csv
+2019-09-04 22:22:42.272 | DEBUG    | __main__:getFileList:241 - Coinbase-BSVWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:42.272 | DEBUG    | __main__:getFileList:241 - Coinbase-Conrad'sVault-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:42.272 | DEBUG    | __main__:getFileList:241 - Coinbase-ETCWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:42.272 | DEBUG    | __main__:getFileList:241 - Coinbase-Ethericwallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:42.272 | DEBUG    | __main__:getFileList:241 - Coinbase-ETHWallet-TaxReport-2019-03-11-22_20_00.csv
+2019-09-04 22:22:42.272 | DEBUG    | __main__:getFileList:241 - Coinbase-LTCWallet-TaxReport-2019-03-11-22_20_00.csv
+2019-09-04 22:22:42.288 | DEBUG    | __main__:getFileList:241 - Coinbase-USDCWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:42.288 | DEBUG    | __main__:getFileList:241 - Coinbase-XRPWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:42.288 | DEBUG    | __main__:getFileList:241 - Coinbase-ZECWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:42.288 | DEBUG    | __main__:getFileList:241 - Coinbase-ZRXWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:42.288 | DEBUG    | __main__:getFileList:241 - contacts.csv
+2019-09-04 22:22:42.288 | DEBUG    | __main__:getFileList:241 - PAI_bankDeposits_sample.csv
+2019-09-04 22:22:42.288 | DEBUG    | __main__:getFileList:241 - PAI_DailyDeposits_sample.csv
+2019-09-04 22:22:42.288 | DEBUG    | __main__:getFileList:241 - Reports-04-08-2019-00_00_00-to-04-08-2019-23_59_59.csv
+2019-09-04 22:22:42.288 | DEBUG    | __main__:getFileList:241 - Reports-05-06-2019-00_00_00-to-05-09-2019-23_59_59.csv
+2019-09-04 22:22:42.288 | ERROR    | __main__:read_csv_file:91 - Error in reading C:\Users\Conrad/Downloads/download.csv
+2019-09-04 22:22:42.288 | WARNING  | __main__:read_csv_file:92 - [Errno 2] No such file or directory: 'C:\\Users\\Conrad/Downloads/download.csv'
+2019-09-04 22:22:42.307 | INFO     | __main__:Main:300 - File not yet found C:\Users\Conrad/Downloads/download.csv. sleeping 10 seconds...
+2019-09-04 22:22:52.310 | INFO     | __main__:Main:294 - ...checking download directory...
+2019-09-04 22:22:52.310 | DEBUG    | __main__:getFileList:241 - 090258_Checking_Transactions_20190107-195212.csv
+2019-09-04 22:22:52.310 | DEBUG    | __main__:getFileList:241 - Coinbase-533abce993be6498e5000366-TaxTransactionsReport-2019-03-11-22_21_35.csv
+2019-09-04 22:22:52.310 | DEBUG    | __main__:getFileList:241 - Coinbase-BATWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:52.310 | DEBUG    | __main__:getFileList:241 - Coinbase-BCHWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:52.310 | DEBUG    | __main__:getFileList:241 - Coinbase-BitcoinWallet-TaxReport-2019-03-11-22_20_00.csv
+2019-09-04 22:22:52.310 | DEBUG    | __main__:getFileList:241 - Coinbase-BSVWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:52.310 | DEBUG    | __main__:getFileList:241 - Coinbase-Conrad'sVault-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:52.310 | DEBUG    | __main__:getFileList:241 - Coinbase-ETCWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:52.310 | DEBUG    | __main__:getFileList:241 - Coinbase-Ethericwallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:52.310 | DEBUG    | __main__:getFileList:241 - Coinbase-ETHWallet-TaxReport-2019-03-11-22_20_00.csv
+2019-09-04 22:22:52.310 | DEBUG    | __main__:getFileList:241 - Coinbase-LTCWallet-TaxReport-2019-03-11-22_20_00.csv
+2019-09-04 22:22:52.325 | DEBUG    | __main__:getFileList:241 - Coinbase-USDCWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:52.325 | DEBUG    | __main__:getFileList:241 - Coinbase-XRPWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:52.325 | DEBUG    | __main__:getFileList:241 - Coinbase-ZECWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:52.325 | DEBUG    | __main__:getFileList:241 - Coinbase-ZRXWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:22:52.325 | DEBUG    | __main__:getFileList:241 - contacts.csv
+2019-09-04 22:22:52.325 | DEBUG    | __main__:getFileList:241 - PAI_bankDeposits_sample.csv
+2019-09-04 22:22:52.325 | DEBUG    | __main__:getFileList:241 - PAI_bankDeposits_sample_2.csv
+2019-09-04 22:22:52.325 | DEBUG    | __main__:getFileList:241 - PAI_DailyDeposits_sample.csv
+2019-09-04 22:22:52.325 | DEBUG    | __main__:getFileList:241 - Reports-04-08-2019-00_00_00-to-04-08-2019-23_59_59.csv
+2019-09-04 22:22:52.325 | DEBUG    | __main__:getFileList:241 - Reports-05-06-2019-00_00_00-to-05-09-2019-23_59_59.csv
+2019-09-04 22:22:52.325 | ERROR    | __main__:read_csv_file:91 - Error in reading C:\Users\Conrad/Downloads/download.csv
+2019-09-04 22:22:52.325 | WARNING  | __main__:read_csv_file:92 - [Errno 2] No such file or directory: 'C:\\Users\\Conrad/Downloads/download.csv'
+2019-09-04 22:22:52.325 | INFO     | __main__:Main:300 - File not yet found C:\Users\Conrad/Downloads/download.csv. sleeping 10 seconds...
+2019-09-04 22:23:02.332 | INFO     | __main__:Main:294 - ...checking download directory...
+2019-09-04 22:23:02.332 | DEBUG    | __main__:getFileList:241 - 090258_Checking_Transactions_20190107-195212.csv
+2019-09-04 22:23:02.332 | DEBUG    | __main__:getFileList:241 - Coinbase-533abce993be6498e5000366-TaxTransactionsReport-2019-03-11-22_21_35.csv
+2019-09-04 22:23:02.332 | DEBUG    | __main__:getFileList:241 - Coinbase-BATWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:23:02.332 | DEBUG    | __main__:getFileList:241 - Coinbase-BCHWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:23:02.332 | DEBUG    | __main__:getFileList:241 - Coinbase-BitcoinWallet-TaxReport-2019-03-11-22_20_00.csv
+2019-09-04 22:23:02.332 | DEBUG    | __main__:getFileList:241 - Coinbase-BSVWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:23:02.332 | DEBUG    | __main__:getFileList:241 - Coinbase-Conrad'sVault-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:23:02.332 | DEBUG    | __main__:getFileList:241 - Coinbase-ETCWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:23:02.332 | DEBUG    | __main__:getFileList:241 - Coinbase-Ethericwallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:23:02.332 | DEBUG    | __main__:getFileList:241 - Coinbase-ETHWallet-TaxReport-2019-03-11-22_20_00.csv
+2019-09-04 22:23:02.332 | DEBUG    | __main__:getFileList:241 - Coinbase-LTCWallet-TaxReport-2019-03-11-22_20_00.csv
+2019-09-04 22:23:02.332 | DEBUG    | __main__:getFileList:241 - Coinbase-USDCWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:23:02.348 | DEBUG    | __main__:getFileList:241 - Coinbase-XRPWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:23:02.348 | DEBUG    | __main__:getFileList:241 - Coinbase-ZECWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:23:02.348 | DEBUG    | __main__:getFileList:241 - Coinbase-ZRXWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-04 22:23:02.348 | DEBUG    | __main__:getFileList:241 - contacts.csv
+2019-09-04 22:23:02.348 | DEBUG    | __main__:getFileList:241 - download.csv
+2019-09-04 22:23:02.348 | DEBUG    | __main__:getFileList:241 - PAI_bankDeposits_sample.csv
+2019-09-04 22:23:02.348 | DEBUG    | __main__:getFileList:241 - PAI_DailyDeposits_sample.csv
+2019-09-04 22:23:02.348 | DEBUG    | __main__:getFileList:241 - Reports-04-08-2019-00_00_00-to-04-08-2019-23_59_59.csv
+2019-09-04 22:23:02.348 | DEBUG    | __main__:getFileList:241 - Reports-05-06-2019-00_00_00-to-05-09-2019-23_59_59.csv
+2019-09-04 22:23:02.348 | DEBUG    | __main__:read_csv_file:95 - <_csv.reader object at 0x000002257F30B6C8>
+2019-09-04 22:23:02.348 | INFO     | __main__:read_csv_file:96 - File csv lines read successfully.
+2019-09-04 22:23:02.348 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: Bank Record Business Code, Bank Record Business, Acct Number, Name On Acct, Settlement Date, Amount
+2019-09-04 22:23:02.367 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/1/19, $5,620.00
+2019-09-04 22:23:02.368 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/2/19, $10,660.00
+2019-09-04 22:23:02.369 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/3/19, $12,120.00
+2019-09-04 22:23:02.371 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/4/19, $9,120.00
+2019-09-04 22:23:02.373 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/5/19, $4,760.00
+2019-09-04 22:23:02.377 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/6/19, $5,260.00
+2019-09-04 22:23:02.379 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/7/19, $5,580.00
+2019-09-04 22:23:02.380 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/8/19, $5,320.00
+2019-09-04 22:23:02.382 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/9/19, $9,220.00
+2019-09-04 22:23:02.384 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/10/19, $6,980.00
+2019-09-04 22:23:02.388 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/11/19, $6,900.00
+2019-09-04 22:23:02.395 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/12/19, $3,560.00
+2019-09-04 22:23:02.403 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/13/19, $4,760.00
+2019-09-04 22:23:02.408 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/14/19, $6,320.00
+2019-09-04 22:23:02.409 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/15/19, $5,620.00
+2019-09-04 22:23:02.411 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/16/19, $6,940.00
+2019-09-04 22:23:02.416 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/17/19, $7,640.00
+2019-09-04 22:23:02.421 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/18/19, $7,700.00
+2019-09-04 22:23:02.422 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/19/19, $4,100.00
+2019-09-04 22:23:02.424 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/20/19, $4,880.00
+2019-09-04 22:23:02.426 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/21/19, $4,240.00
+2019-09-04 22:23:02.429 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/22/19, $3,960.00
+2019-09-04 22:23:02.432 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/23/19, $8,000.00
+2019-09-04 22:23:02.435 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/24/19, $8,020.00
+2019-09-04 22:23:02.441 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/25/19, $5,780.00
+2019-09-04 22:23:02.444 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/26/19, $4,820.00
+2019-09-04 22:23:02.448 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/27/19, $3,820.00
+2019-09-04 22:23:02.449 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/28/19, $4,400.00
+2019-09-04 22:23:02.451 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/29/19, $4,260.00
+2019-09-04 22:23:02.454 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/30/19, $8,180.00
+2019-09-04 22:23:02.456 | DEBUG    | __main__:convert_schwab_csv_file:186 - not_posted: 02-UIDK3A, Storz Cash Services LLC, ******1132, Storz Cash Services LLC, 8/31/19, $7,600.00
+2019-09-04 22:23:02.458 | INFO     | __main__:convert_schwab_csv_file:193 - No POSTED transactions found.
+2019-09-04 22:23:02.470 | INFO     | __main__:process_file:263 - File C:\Users\Conrad/Documents/notFound_notFound.qbo contents written successfully.
+2019-09-04 22:23:02.473 | INFO     | __main__:remove_file:269 - Attempting to remove old C:\Users\Conrad/Downloads/download.csv file...
+2019-09-04 22:23:02.475 | INFO     | __main__:remove_file:277 - Success removing C:\Users\Conrad/Downloads/download.csv
+2019-09-04 22:23:02.477 | INFO     | __main__:Main:306 - Program End: nominal

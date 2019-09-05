@@ -161,6 +161,20 @@ def create_qbo_statement_block(xact):
     return formatted_transaction
 
 @logger.catch
+def strip_nonPosted(lines):
+    not_posted = True
+    posted_xacts = []
+    for line in lines:  # first strip unwanted headers and pending xacts
+        if not_posted:
+            logger.debug(f'not_posted: {", ".join(line)}')
+            if line[0] == "Posted Transactions":
+                not_posted = False
+        else:
+            logger.debug(f'posted: {", ".join(line)}')
+            posted_xacts.append(line)
+    return posted_xacts
+
+@logger.catch
 def convert_schwab_csv_file(lines, text):
     """convert_schwab_csv_file(list of lines, list of text strings to remove)
     Remove unwanted text from transaction data from bank download in quickbooks format.
@@ -172,52 +186,29 @@ def convert_schwab_csv_file(lines, text):
         values are sometimes enclosed in quotes
     """
     global file_date, acct_number
-
-    qbo_file_lines = []
+    qbo_file_lines = [] # start to build QBO output format
     qbo_file_lines.append(qbo_file_header)
-
-    # qbo_file_lines.append()
-    # print(lines)
-    not_posted = True
-    posted_xacts = []
-    for line in lines:  # first strip unwanted headers and pending xacts
-        # print(line)
-        if not_posted:
-            logger.debug(f'not_posted: {", ".join(line)}')
-            if line[0] == "Posted Transactions":
-                not_posted = False
-        else:
-            logger.debug(f'posted: {", ".join(line)}')
-            posted_xacts.append(line)
+    posted_xacts = strip_nonPosted(lines)
     if posted_xacts == []:
         logger.info("No POSTED transactions found.")
-        return qbo_file_lines
-
-    # print(posted_xacts)
+        return qbo_file_lines.append(qbo_file_final_boilerplate)
     file_date = Fix_date(
         posted_xacts[0][0]
     )  # most recent date is same as first xact date
     qbo_DTSERVER_date = (
         qbo_file_date_header + file_date + qbo_DTSERVER_time
     )  # full datetimestamp format
-
     qbo_file_lines.append(qbo_DTSERVER_date)
-
     qbo_file_lines.append(qbo_file_bank_id_boilerplate)
-
     least_recent = Fix_date(
         posted_xacts[-1][0]
     )  # last xact contains the most remote date
     qbo_file_lines.append(qbo_DTSTART_date + least_recent + "\n")
-
     qbo_file_lines.append(qbo_DTEND_date + file_date + "\n")
-
     for line in posted_xacts:
         for item in create_qbo_statement_block(line):
             qbo_file_lines.append(item)
-
     qbo_file_lines.append(qbo_file_final_boilerplate)
-
     return qbo_file_lines
 
 
@@ -243,6 +234,47 @@ def getFileList(target_directory, base_Extension):
 
 
 @logger.catch
+def process_file(originalfile, bad_text):
+    # we have a file, try to process
+    result = convert_schwab_csv_file(originalfile, bad_text)
+    if result == []:
+        logger.error("Failed to convert:  %s" % originalfile)
+        sys.exit(1)
+
+    # Attempt to write results to cleanfile
+    cf = outputdirectory + file_date + "_" + acct_number + output_file_extension
+    try:
+        with open(cf, "w") as f:
+            f.writelines(result)
+    except Exception as e:
+        logger.error("Error in writing %s" % cf)
+        logger.warning(str(e))
+        sys.exit(1)
+
+    logger.info("File %s contents written successfully." % cf)
+    return cf
+
+
+@logger.catch
+def remove_file(FQ_file_path):
+    logger.info("Attempting to remove old %s file..." % FQ_file_path)
+
+    if os.path.exists(FQ_file_path):
+        try:
+            os.remove(FQ_file_path)
+        except OSError as e:
+            logger.warning("Error: %s." % e)
+            return 2
+        logger.info("Success removing %s" % FQ_file_path)
+        return 0
+
+    else:
+        logger.info("Sorry, I can not find %s file." % FQ_file_path)
+        return 1
+    return None
+
+
+@logger.catch
 def Main():
     defineLoggers()
     logger.info("Program Start.")  # log the start of the program
@@ -252,48 +284,19 @@ def Main():
         # loop until something to process is found
         logger.info("...checking download directory...")
         files = getFileList(basedirectory, base_file_extension)
-        file_path = os.path.join(basedirectory, filename)
-        originalfile = read_csv_file(file_path)
+        FQ_file_path = os.path.join(basedirectory, filename)
+        originalfile = read_csv_file(FQ_file_path)
 
         if originalfile == []:
-            logger.info("File not yet found %s. sleeping 10 seconds..." % file_path)
+            logger.info("File not yet found %s. sleeping 10 seconds..." % FQ_file_path)
             time.sleep(10)
         else:
-            # we have a file, try to process
-            result = convert_schwab_csv_file(originalfile, bad_text)
-            if result == []:
-                logger.error("Failed to convert:  %s" % originalfile)
-                sys.exit(1)
-
-            # Attempt to write results to cleanfile
-            cf = outputdirectory + file_date + "_" + acct_number + output_file_extension
-            try:
-                with open(cf, "w") as f:
-                    f.writelines(result)
-            except Exception as e:
-                logger.error("Error in writing %s" % cf)
-                logger.warning(str(e))
-                sys.exit(1)
-
-            logger.info("File %s contents written successfully." % cf)
-
-            logger.info("Attempting to remove old %s file..." % file_path)
-
-            if os.path.exists(file_path):
-                try:
-                    os.remove(file_path)
-                except OSError as e:
-                    logger.warning("Error: %s." % e)
-                    sys.exit(1)
-                logger.info("Success removing %s" % file_path)
-
-            else:
-                logger.info("Sorry, I can not find %s file." % file_path)
-
+            clean_f = process_file(originalfile, bad_text)
+            remove_file(FQ_file_path)
             # declare program end
             logger.info("Program End: %s" % "nominal")
             sys.exit(0)
-    return
+    return None
 
 
 """Check if this file is being run directly
