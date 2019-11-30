@@ -1,0 +1,27 @@
+2019-09-05 09:21:11.678 | INFO     | __main__:Main:278 - Program Start.
+2019-09-05 09:21:11.687 | INFO     | __main__:Main:279 - csv2qbo.py
+2019-09-05 09:21:11.697 | INFO     | __main__:Main:281 - Program Start: nominal
+2019-09-05 09:21:11.705 | INFO     | __main__:Main:285 - ...checking download directory...
+2019-09-05 09:21:11.714 | DEBUG    | __main__:getFileList:230 - 090258_Checking_Transactions_20190107-195212.csv
+2019-09-05 09:21:11.720 | DEBUG    | __main__:getFileList:230 - Coinbase-533abce993be6498e5000366-TaxTransactionsReport-2019-03-11-22_21_35.csv
+2019-09-05 09:21:11.727 | DEBUG    | __main__:getFileList:230 - Coinbase-BATWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-05 09:21:11.763 | DEBUG    | __main__:getFileList:230 - Coinbase-BCHWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-05 09:21:11.774 | DEBUG    | __main__:getFileList:230 - Coinbase-BitcoinWallet-TaxReport-2019-03-11-22_20_00.csv
+2019-09-05 09:21:11.793 | DEBUG    | __main__:getFileList:230 - Coinbase-BSVWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-05 09:21:11.800 | DEBUG    | __main__:getFileList:230 - Coinbase-Conrad'sVault-TaxReport-2019-03-11-22_19_59.csv
+2019-09-05 09:21:11.814 | DEBUG    | __main__:getFileList:230 - Coinbase-ETCWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-05 09:21:11.820 | DEBUG    | __main__:getFileList:230 - Coinbase-Ethericwallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-05 09:21:11.830 | DEBUG    | __main__:getFileList:230 - Coinbase-ETHWallet-TaxReport-2019-03-11-22_20_00.csv
+2019-09-05 09:21:11.838 | DEBUG    | __main__:getFileList:230 - Coinbase-LTCWallet-TaxReport-2019-03-11-22_20_00.csv
+2019-09-05 09:21:11.844 | DEBUG    | __main__:getFileList:230 - Coinbase-USDCWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-05 09:21:11.859 | DEBUG    | __main__:getFileList:230 - Coinbase-XRPWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-05 09:21:11.865 | DEBUG    | __main__:getFileList:230 - Coinbase-ZECWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-05 09:21:11.876 | DEBUG    | __main__:getFileList:230 - Coinbase-ZRXWallet-TaxReport-2019-03-11-22_19_59.csv
+2019-09-05 09:21:11.883 | DEBUG    | __main__:getFileList:230 - contacts.csv
+2019-09-05 09:21:11.892 | DEBUG    | __main__:getFileList:230 - PAI_bankDeposits_sample.csv
+2019-09-05 09:21:11.898 | DEBUG    | __main__:getFileList:230 - PAI_DailyDeposits_sample.csv
+2019-09-05 09:21:11.913 | DEBUG    | __main__:getFileList:230 - Reports-04-08-2019-00_00_00-to-04-08-2019-23_59_59.csv
+2019-09-05 09:21:11.919 | DEBUG    | __main__:getFileList:230 - Reports-05-06-2019-00_00_00-to-05-09-2019-23_59_59.csv
+2019-09-05 09:21:11.927 | ERROR    | __main__:read_csv_file:89 - Error in reading C:\Users\Conrad/Downloads/download.csv
+2019-09-05 09:21:11.933 | WARNING  | __main__:read_csv_file:90 - [Errno 2] No such file or directory: 'C:\\Users\\Conrad/Downloads/download.csv'
+2019-09-05 09:21:11.940 | INFO     | __main__:Main:291 - File not yet found C:\Users\Conrad/Downloads/download.csv. sleeping 10 seconds...

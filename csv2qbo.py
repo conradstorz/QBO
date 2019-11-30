@@ -71,8 +71,6 @@ def hashID(string):
 #d = {"clientip": "xxx.xxx.xxx.xxx", "user": "qbo_loggs"}
 # logger.warning('Protocol problem: %s', 'connection reset')
 
-# declare program start
-logger.info("Program Start: %s" % "nominal")
 
 @logger.catch
 def read_csv_file(base_file):
@@ -279,6 +277,8 @@ def Main():
     defineLoggers()
     logger.info("Program Start.")  # log the start of the program
     logger.info(runtime_name)
+    # declare program start
+    logger.info("Program Start: %s" % "nominal")
 
     while True:
         # loop until something to process is found
@@ -298,6 +298,9 @@ def Main():
             sys.exit(0)
     return None
 
+# TDD test code sample
+def HelloWorld():
+    pass
 
 """Check if this file is being run directly
 """
