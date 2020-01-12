@@ -4,8 +4,8 @@
 file_extension = ".qbo"
 filename = "download.qbo"
 # cleanfile = 'clean.qbo'
-basedirectory = "./Downloads/"
-outputdirectory = "./Documents/"
+basedirectory = "C:/Users/Conrad/Downloads/"
+outputdirectory = "C:/Users/Conrad/Documents/"
 
 # text to remove from transaction descriptions
 # bad_text = ["DEBIT +\d{4}", "CKCD DEBIT ", "AC-", "POS DEBIT ", "POS DB "]
@@ -165,8 +165,9 @@ def Main():
         handlers=[{"sink": os.sys.stderr, "level": "INFO"}]
     )  # this method automatically suppresses the default handler to modify the message level
 
+    #logfile_name = f'./LOGS/{runtime_name}_{time}.log'
     logger.add(  # create a new log file for each run of the program
-        runtime_name + "_{time}.log", level="INFO"
+        './LOGS/' + runtime_name + '_{time}.log', level="INFO"
     )
 
     logger.info("Program Start.")  # log the start of the program
