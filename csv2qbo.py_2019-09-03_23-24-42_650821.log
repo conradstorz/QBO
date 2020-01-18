@@ -1,8 +1,0 @@
-2019-09-03 23:24:42.654 | INFO     | __main__:Main:327 - Program Start.
-2019-09-03 23:24:42.655 | INFO     | __main__:Main:328 - csv2qbo.py
-2019-09-03 23:24:42.657 | INFO     | __main__:Main:332 - ...checking download directory...
-2019-09-03 23:24:42.667 | INFO     | __main__:read_csv_file:190 - File csv lines read successfully.
-2019-09-03 23:24:59.641 | INFO     | __main__:Main:359 - File C:\Users\Conrad/Documents/20190903_.qbo contents written successfully.
-2019-09-03 23:24:59.643 | INFO     | __main__:Main:361 - Attempting to remove old C:\Users\Conrad/Downloads/download.csv file...
-2019-09-03 23:24:59.645 | INFO     | __main__:Main:369 - Success removing C:\Users\Conrad/Downloads/download.csv
-2019-09-03 23:24:59.681 | INFO     | __main__:Main:375 - Program End: nominal
