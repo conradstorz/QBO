@@ -1,4 +1,9 @@
-# qbo_updater / Modify Quickbooks bank downloads to improve importing accuracy
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+""" qbo_updater / Modify Quickbooks bank downloads to improve importing accuracy
+"""
+
 
 # files to be updated
 file_extension = ".qbo"

@@ -1,7 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """ file csv2qbo.py
 initial version compatible with schwab.com checking csv downloads
 """
-# csv2qbo / Modify csv bank downloads into qbo file format
 
 from pathlib import Path
 home = str(Path.home()) # gather the home directory
