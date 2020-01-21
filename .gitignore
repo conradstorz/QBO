@@ -4,6 +4,9 @@
 # zipped logs
 *.log.zip
 
+# vscode.settings.json
+.vscode/
+
 # local DB files
 *.json_db
 
