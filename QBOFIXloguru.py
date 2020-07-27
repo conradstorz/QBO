@@ -14,30 +14,30 @@ OUTPUT_DIRECTORY = "C:/Users/Conrad/Documents/"
 # text to remove from transaction descriptions
 BAD_TEXT = [r"DEBIT +\d{4}", "CKCD ", "AC-", "POS ", "POS DB "]
 
-QBO_FILE_DATE_TAG = "<DTEND>"
-file_date = ""
-ACCOUNT_NUMBER_TAG = "<ACCTID>"
-acct_number = ""
 
-import os
 import re
 import sys
 import time
+from pathlib import Path
 from loguru import logger
 
-RUNTIME_NAME = os.path.basename(__file__)
+RUNTIME_NAME = Path(__file__).name
+RUNTIME_CWD = Path.cwd()
+QBO_DOWNLOAD_DIRECTORY = Path(BASE_DIRECTORY)
+QBO_MODIFIED_DIRECTORY = Path(OUTPUT_DIRECTORY)
+
 
 
 @logger.catch
-def read_base_file(base_file):
-    """read_base_file(fully qualified filename)
+def read_base_file(input_file):
+    """read_base_file(Pathlib_Object)
     Return a list of lines contained in base_file.
     """
     try:
-        with open(base_file) as IN_FILE:
+        with open(input_file) as IN_FILE:
             file_contents = IN_FILE.readlines()
     except Exception as e:
-        logger.error("Error in reading %s", base_file)
+        logger.error(f"Error in reading {input_file.name}")
         logger.warning(str(e))
         file_contents = []
 
@@ -66,7 +66,9 @@ def clean_qbo_file(lines, text):
     the fact that the memo line has a longer line length allowed by quickbooks.
     This function replaces the nametag with the cleaned memotag data.
     """
-    global file_date, acct_number
+    QBO_FILE_DATE_TAG = "<DTEND>"
+    ACCOUNT_NUMBER_TAG = "<ACCTID>"
+    file_date, acct_number = 'nodate', 'nonumber'
     maximum_nametag_line_length = 32
     MEMO_TAG = "<MEMO>"
     NAME_TAG = "<NAME>"
@@ -110,7 +112,8 @@ def clean_qbo_file(lines, text):
             logger.debug(backupname + " ...restored")
         clean_file_lines.append(current_line)
 
-    return clean_file_lines[::-1]  # return lines in same order as submitted
+    return (clean_file_lines[::-1],  # return lines in same order as submitted
+            file_date, acct_number)
 
 
 @logger.catch
@@ -119,44 +122,46 @@ def process_QBO():
     while True:
         # loop until something to process is found
         logger.info("...checking download directory...")
-        for name in os.listdir(BASE_DIRECTORY):
+        for name in list(QBO_DOWNLOAD_DIRECTORY.glob('*.js')):
             if name.endswith(".qbo"):
                 print(name)
-        file_path = os.path.join(BASE_DIRECTORY, DEFAULT_DOWNLOAD_FILENAME)
+        file_pathobj = Path(QBO_DOWNLOAD_DIRECTORY, DEFAULT_DOWNLOAD_FILENAME)
 
-        originalfile = read_base_file(file_path)
+        originalfile = read_base_file(file_pathobj)
 
         if originalfile == []:
-            logger.info("File not yet found %s" % file_path)
+            logger.info(f"File not yet found {file_pathobj}")
             time.sleep(10)
         else:
             # we have a file, try to process
-            result = clean_qbo_file(originalfile, BAD_TEXT)
+            result, file_date, acct_number = clean_qbo_file(originalfile, BAD_TEXT)
 
             # Attempt to write results to cleanfile
-            cf = OUTPUT_DIRECTORY + file_date + "_" + acct_number + FILE_EXT
+            fname = "".join(file_date, "_", acct_number, FILE_EXT)
+            logger.info(f'Attempting to output to file name: {fname}')
+            clean_output_file = Path(QBO_MODIFIED_DIRECTORY, fname)
             try:
-                with open(cf, "w") as f:
+                with open(clean_output_file, "w") as f:
                     f.writelines(result)
             except Exception as e:
-                logger.error("Error in writing %s", cf)
+                logger.error("Error in writing %s", clean_output_file)
                 logger.warning(str(e))
                 sys.exit(1)
 
-            logger.info("File %s contents written successfully." % cf)
+            logger.info("File %s contents written successfully." % clean_output_file)
 
-            logger.info("Attempting to remove old %s file..." % file_path)
+            logger.info("Attempting to remove old %s file..." % file_pathobj)
 
-            if os.path.exists(file_path):
+            if os.path.exists(file_pathobj):
                 try:
-                    os.remove(file_path)
+                    os.remove(file_pathobj)
                 except OSError as e:
                     logger.warning("Error: %s - %s." % (e.file_path, e.strerror))
                     sys.exit(1)
-                logger.info("Success removing %s" % file_path)
+                logger.info("Success removing %s" % file_pathobj.name)
 
             else:
-                logger.info("Sorry, I can not find %s file." % file_path)
+                logger.info("Sorry, I can not find %s file." % file_pathobj.name)
 
             # declare program end
             logger.info("Program End: %s", "nominal")
