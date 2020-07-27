@@ -152,7 +152,7 @@ def process_QBO():
 
             logger.info("Attempting to remove old %s file..." % file_pathobj)
 
-            if os.path.exists(file_pathobj):
+            if Path(file_pathobj).exists():
                 try:
                     os.remove(file_pathobj)
                 except OSError as e:
