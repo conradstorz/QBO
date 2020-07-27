@@ -6,18 +6,17 @@
 
 
 # files to be updated
-file_extension = ".qbo"
-filename = "download.qbo"
-# cleanfile = 'clean.qbo'
-basedirectory = "C:/Users/Conrad/Downloads/"
-outputdirectory = "C:/Users/Conrad/Documents/"
+FILE_EXT = ".qbo"
+DEFAULT_DOWNLOAD_FILENAME = "download.qbo"
+BASE_DIRECTORY = "C:/Users/Conrad/Downloads/"
+OUTPUT_DIRECTORY = "C:/Users/Conrad/Documents/"
 
 # text to remove from transaction descriptions
-# bad_text = ["DEBIT +\d{4}", "CKCD DEBIT ", "AC-", "POS DEBIT ", "POS DB "]
-bad_text = [r"DEBIT +\d{4}", "CKCD ", "AC-", "POS ", "POS DB "]
-qbo_file_date_tag = "<DTEND>"
+BAD_TEXT = [r"DEBIT +\d{4}", "CKCD ", "AC-", "POS ", "POS DB "]
+
+QBO_FILE_DATE_TAG = "<DTEND>"
 file_date = ""
-acct_number_tag = "<ACCTID>"
+ACCOUNT_NUMBER_TAG = "<ACCTID>"
 acct_number = ""
 
 import os
@@ -26,7 +25,7 @@ import sys
 import time
 from loguru import logger
 
-runtime_name = os.path.basename(__file__)
+RUNTIME_NAME = os.path.basename(__file__)
 
 
 @logger.catch
@@ -35,8 +34,8 @@ def read_base_file(base_file):
     Return a list of lines contained in base_file.
     """
     try:
-        with open(base_file) as f:
-            file_contents = f.readlines()
+        with open(base_file) as IN_FILE:
+            file_contents = IN_FILE.readlines()
     except Exception as e:
         logger.error("Error in reading %s", base_file)
         logger.warning(str(e))
@@ -69,46 +68,47 @@ def clean_qbo_file(lines, text):
     """
     global file_date, acct_number
     maximum_nametag_line_length = 32
-    memotag = "<MEMO>"
-    nametag = "<NAME>"
+    MEMO_TAG = "<MEMO>"
+    NAME_TAG = "<NAME>"
     name_line = "<ERROR>"
+    backupname = "<MEMO>"
     clean_file_lines = []
-    for line in lines[::-1]:
+    for current_line in lines[::-1]:
         # in reverse order [::-1] so we process memo before name lines
-        logger.debug(line)
-        if line.startswith(nametag):
-            backupname = line  # just in case there is no memo line
+        logger.debug(current_line)
+        if current_line.startswith(NAME_TAG):
+            backupname = current_line  # just in case there is no memo line
 
-        if line.startswith(qbo_file_date_tag):
+        if current_line.startswith(QBO_FILE_DATE_TAG):
             # extract file date for use with naming output file
-            file_date = line.replace(qbo_file_date_tag, "").lstrip().rstrip()
+            file_date = current_line.replace(QBO_FILE_DATE_TAG, "").lstrip().rstrip()
 
-        if line.startswith(acct_number_tag):
+        if current_line.startswith(ACCOUNT_NUMBER_TAG):
             # extract bank account number for use in naming output file
-            acct_number = line.replace(acct_number_tag, "").lstrip().rstrip()
+            acct_number = current_line.replace(ACCOUNT_NUMBER_TAG, "").lstrip().rstrip()
 
-        if line.startswith(memotag):
+        if current_line.startswith(MEMO_TAG):
             # memo lines contain the desired info about transactions
             # name lines are used by quickbooks to match transactions
             # discard less useful nametag information from bank after cleaning memo info
-            line = line.replace(memotag, "").lstrip()  # remove memotag
+            current_line = current_line.replace(MEMO_TAG, "").lstrip()  # remove memotag
             for t in text:
                 # remove each occurance from line
-                line = Clean_Line(t, line)
-                logger.debug(line)
+                current_line = Clean_Line(t, current_line)
+                logger.debug(current_line)
 
-            name_line = nametag + line[:maximum_nametag_line_length] + "\n"
-            line = memotag + line + "\n"  # replace memotag
+            name_line = NAME_TAG + current_line[:maximum_nametag_line_length] + "\n"
+            current_line = MEMO_TAG + current_line + "\n"  # replace memotag
 
-        if line.startswith(nametag):
-            line = name_line  # replace nameline with memoline
+        if current_line.startswith(NAME_TAG):
+            current_line = name_line  # replace nameline with memoline
 
-        logger.debug(line)
-        if line == "<ERROR>":  # there was no memo line
+        logger.debug(current_line)
+        if current_line == "<ERROR>":  # there was no memo line
             logger.info("there was no MEMO line for the current entry.")
-            line = backupname  # so restore the original contents
+            current_line = backupname  # so restore the original contents
             logger.debug(backupname + " ...restored")
-        clean_file_lines.append(line)
+        clean_file_lines.append(current_line)
 
     return clean_file_lines[::-1]  # return lines in same order as submitted
 
@@ -119,10 +119,10 @@ def process_QBO():
     while True:
         # loop until something to process is found
         logger.info("...checking download directory...")
-        for name in os.listdir(basedirectory):
+        for name in os.listdir(BASE_DIRECTORY):
             if name.endswith(".qbo"):
                 print(name)
-        file_path = os.path.join(basedirectory, filename)
+        file_path = os.path.join(BASE_DIRECTORY, DEFAULT_DOWNLOAD_FILENAME)
 
         originalfile = read_base_file(file_path)
 
@@ -131,10 +131,10 @@ def process_QBO():
             time.sleep(10)
         else:
             # we have a file, try to process
-            result = clean_qbo_file(originalfile, bad_text)
+            result = clean_qbo_file(originalfile, BAD_TEXT)
 
             # Attempt to write results to cleanfile
-            cf = outputdirectory + file_date + "_" + acct_number + file_extension
+            cf = OUTPUT_DIRECTORY + file_date + "_" + acct_number + FILE_EXT
             try:
                 with open(cf, "w") as f:
                     f.writelines(result)
@@ -172,7 +172,7 @@ def Main():
 
     #logfile_name = f'./LOGS/{runtime_name}_{time}.log'
     logger.add(  # create a new log file for each run of the program
-        './LOGS/' + runtime_name + '_{time}.log', level="INFO"
+        './LOGS/' + RUNTIME_NAME + '_{time}.log', level="INFO"
     )
 
     logger.info("Program Start.")  # log the start of the program
