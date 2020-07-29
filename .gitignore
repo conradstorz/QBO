@@ -6,6 +6,7 @@
 
 # vscode.settings.json
 .vscode
+.vscode/settings.json
 
 # local DB files
 *.json_db
@@ -139,3 +140,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
