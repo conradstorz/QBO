@@ -12,9 +12,10 @@ BASE_DIRECTORY = "C:/Users/Conrad/Downloads/"
 OUTPUT_DIRECTORY = "C:/Users/Conrad/Documents/"
 
 # text to remove from transaction descriptions
-BAD_TEXT = [r"DEBIT +\d{4}", "CKCD ", "AC-", "POS ", "POS DB "]
+BAD_TEXT = [r"DEBIT +\d{4}", "CKCD ", "AC-", "POS ", "POS DB ", "-ONLINE", "-ACH"]
 
 
+import os
 import re
 import sys
 import time
@@ -130,14 +131,14 @@ def process_QBO():
         originalfile = read_base_file(file_pathobj)
 
         if originalfile == []:
-            logger.info(f"File not yet found {file_pathobj}")
+            logger.info(f"File not yet found: {file_pathobj.name}")
             time.sleep(10)
         else:
             # we have a file, try to process
             result, file_date, acct_number = clean_qbo_file(originalfile, BAD_TEXT)
 
             # Attempt to write results to cleanfile
-            fname = "".join(file_date, "_", acct_number, FILE_EXT)
+            fname = "".join([file_date, "_", acct_number, FILE_EXT])
             logger.info(f'Attempting to output to file name: {fname}')
             clean_output_file = Path(QBO_MODIFIED_DIRECTORY, fname)
             try:
@@ -164,7 +165,7 @@ def process_QBO():
                 logger.info("Sorry, I can not find %s file." % file_pathobj.name)
 
             # declare program end
-            logger.info("Program End: %s", "nominal")
+            logger.info("Program End: nominal")
             sys.exit(0)
     return
 
