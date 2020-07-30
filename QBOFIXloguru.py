@@ -28,7 +28,6 @@ QBO_DOWNLOAD_DIRECTORY = Path(BASE_DIRECTORY)
 QBO_MODIFIED_DIRECTORY = Path(OUTPUT_DIRECTORY)
 
 
-
 @logger.catch
 def read_base_file(input_file):
     """read_base_file(Pathlib_Object)
@@ -69,7 +68,7 @@ def clean_qbo_file(lines, text):
     """
     QBO_FILE_DATE_TAG = "<DTEND>"
     ACCOUNT_NUMBER_TAG = "<ACCTID>"
-    file_date, acct_number = 'nodate', 'nonumber'
+    file_date, acct_number = "nodate", "nonumber"
     maximum_nametag_line_length = 32
     MEMO_TAG = "<MEMO>"
     NAME_TAG = "<NAME>"
@@ -113,8 +112,11 @@ def clean_qbo_file(lines, text):
             logger.debug(backupname + " ...restored")
         clean_file_lines.append(current_line)
 
-    return (clean_file_lines[::-1],  # return lines in same order as submitted
-            file_date, acct_number)
+    return (
+        clean_file_lines[::-1],  # return lines in same order as submitted
+        file_date,
+        acct_number,
+    )
 
 
 @logger.catch
@@ -123,7 +125,7 @@ def process_QBO():
     while True:
         # loop until something to process is found
         logger.info("...checking download directory...")
-        for name in list(QBO_DOWNLOAD_DIRECTORY.glob('*.js')):
+        for name in list(QBO_DOWNLOAD_DIRECTORY.glob("*.js")):
             if name.endswith(".qbo"):
                 print(name)
         file_pathobj = Path(QBO_DOWNLOAD_DIRECTORY, DEFAULT_DOWNLOAD_FILENAME)
@@ -139,30 +141,30 @@ def process_QBO():
 
             # Attempt to write results to cleanfile
             fname = "".join([file_date, "_", acct_number, FILE_EXT])
-            logger.info(f'Attempting to output to file name: {fname}')
+            logger.info(f"Attempting to output to file name: {fname}")
             clean_output_file = Path(QBO_MODIFIED_DIRECTORY, fname)
             try:
                 with open(clean_output_file, "w") as f:
                     f.writelines(result)
             except Exception as e:
-                logger.error("Error in writing %s", clean_output_file)
+                logger.error(f"Error in writing {clean_output_file}")
                 logger.warning(str(e))
                 sys.exit(1)
 
-            logger.info("File %s contents written successfully." % clean_output_file)
+            logger.info("File {clean_output_file} contents written successfully.")
 
-            logger.info("Attempting to remove old %s file..." % file_pathobj)
+            logger.info(f"Attempting to remove old {file_pathobj} file...")
 
             if Path(file_pathobj).exists():
                 try:
                     os.remove(file_pathobj)
                 except OSError as e:
-                    logger.warning("Error: %s - %s." % (e.file_path, e.strerror))
+                    logger.warning(f"Error: {e.file_path} - {e.strerror}"))
                     sys.exit(1)
-                logger.info("Success removing %s" % file_pathobj.name)
+                logger.info(f"Success removing {file_pathobj.name}")
 
             else:
-                logger.info("Sorry, I can not find %s file." % file_pathobj.name)
+                logger.info(f"Sorry, I can not find {file_pathobj.name} file.")
 
             # declare program end
             logger.info("Program End: nominal")
@@ -176,9 +178,9 @@ def Main():
         handlers=[{"sink": os.sys.stderr, "level": "INFO"}]
     )  # this method automatically suppresses the default handler to modify the message level
 
-    #logfile_name = f'./LOGS/{runtime_name}_{time}.log'
+    # logfile_name = f'./LOGS/{runtime_name}_{time}.log'
     logger.add(  # create a new log file for each run of the program
-        './LOGS/' + RUNTIME_NAME + '_{time}.log', level="INFO"
+        f"./LOGS/{RUNTIME_NAME}_{time}.log", level="INFO"
     )
 
     logger.info("Program Start.")  # log the start of the program
