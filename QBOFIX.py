@@ -124,7 +124,7 @@ if __name__ == "__main__":
         originalfile = read_base_file(file_path)
 
         if originalfile == []:
-            logging.info("File not yet found %s" % file_path, extra=d)
+            logging.info(f"File not yet found {file_path}", extra=d)
             time.sleep(10)
         else:
             # we have a file, try to process
@@ -140,22 +140,22 @@ if __name__ == "__main__":
                 logging.warning(str(e), extra=d)
                 sys.exit(1)
 
-            logging.info("File %s contents written successfully." % cf, extra=d)
+            logging.info(f"File {cf} contents written successfully.", extra=d)
 
-            logging.info("Attempting to remove old %s file..." % file_path, extra=d)
+            logging.info(f"Attempting to remove old {file_path} file...", extra=d)
 
             if os.path.exists(file_path):
                 try:
                     os.remove(file_path)
                 except OSError as e:
                     logging.warning(
-                        "Error: %s - %s." % (e.file_path, e.strerror), extra=d
+                        f"Error: {e.file_path} - {e.strerror}.", extra=d
                     )
                     sys.exit(1)
-                logging.info("Success removing %s" % file_path, extra=d)
+                logging.info(f"Success removing {file_path}", extra=d)
 
             else:
-                logging.info("Sorry, I can not find %s file." % file_path, extra=d)
+                logging.info(f"Sorry, I can not find {file_path} file.", extra=d)
 
             # declare program end
             logging.info("Program End: %s", "nominal", extra=d)
