@@ -19,11 +19,16 @@ import os
 import re
 import sys
 import time
+import datetime
 from pathlib import Path
 from loguru import logger
 
+from time_strings import LOCAL_NOW_STRING
+
 RUNTIME_NAME = Path(__file__).name
 RUNTIME_CWD = Path.cwd()
+LN = LOCAL_NOW_STRING()
+RUNTIME_OS_SAFE_NAME = "".join(i for i in LN if i not in "\/:*?<>|")
 QBO_DOWNLOAD_DIRECTORY = Path(BASE_DIRECTORY)
 QBO_MODIFIED_DIRECTORY = Path(OUTPUT_DIRECTORY)
 
@@ -151,7 +156,7 @@ def process_QBO():
                 logger.warning(str(e))
                 sys.exit(1)
 
-            logger.info("File {clean_output_file} contents written successfully.")
+            logger.info(f"File {clean_output_file} contents written successfully.")
 
             logger.info(f"Attempting to remove old {file_pathobj} file...")
 
@@ -159,7 +164,7 @@ def process_QBO():
                 try:
                     os.remove(file_pathobj)
                 except OSError as e:
-                    logger.warning(f"Error: {e.file_path} - {e.strerror}"))
+                    logger.warning(f"Error: {e.file_path} - {e.strerror}")
                     sys.exit(1)
                 logger.info(f"Success removing {file_pathobj.name}")
 
@@ -180,7 +185,7 @@ def Main():
 
     # logfile_name = f'./LOGS/{runtime_name}_{time}.log'
     logger.add(  # create a new log file for each run of the program
-        f"./LOGS/{RUNTIME_NAME}_{time}.log", level="INFO"
+        f"./LOGS/{RUNTIME_NAME}_{RUNTIME_OS_SAFE_NAME}.log", level="INFO"
     )
 
     logger.info("Program Start.")  # log the start of the program
