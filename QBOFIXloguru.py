@@ -8,7 +8,7 @@
 # files to be updated
 FILE_EXT = ".qbo"
 DEFAULT_DOWNLOAD_FILENAME = "download.qbo"
-BASE_DIRECTORY = "C:/Users/Conrad/Downloads/"
+BASE_DIRECTORY = "G:/Downloads/"
 OUTPUT_DIRECTORY = "C:/Users/Conrad/Documents/"
 
 # text to remove from transaction descriptions
