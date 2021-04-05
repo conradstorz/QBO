@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """ qbo_updater / Modify Quickbooks bank downloads to improve importing accuracy
@@ -19,16 +18,16 @@ import os
 import re
 import sys
 import time
-import datetime
-from pathlib import Path
 from loguru import logger
+import datetime as dt
+from pathlib import Path
 
 from time_strings import LOCAL_NOW_STRING
 
 RUNTIME_NAME = Path(__file__).name
 RUNTIME_CWD = Path.cwd()
 LN = LOCAL_NOW_STRING()
-RUNTIME_OS_SAFE_NAME = "".join(i for i in LN if i not in "\/:*?<>|")
+OS_FILENAME_SAFE_TIMESTR = "".join(i for i in LN if i not in "\/:*?<>|")
 QBO_DOWNLOAD_DIRECTORY = Path(BASE_DIRECTORY)
 QBO_MODIFIED_DIRECTORY = Path(OUTPUT_DIRECTORY)
 
@@ -178,19 +177,61 @@ def process_QBO():
 
 
 @logger.catch
-def Main():
-    logger.configure(
-        handlers=[{"sink": os.sys.stderr, "level": "INFO"}]
-    )  # this method automatically suppresses the default handler to modify the message level
+def defineLoggers(filename):
+    class Rotator:
+        # Custom rotation handler that combines filesize limits with time controlled rotation.
+        def __init__(self, *, size, at):
+            now = dt.datetime.now()
+            self._size_limit = size
+            self._time_limit = now.replace(hour=at.hour, minute=at.minute, second=at.second)
+            if now >= self._time_limit:
+                # The current time is already past the target time so it would rotate already.
+                # Add one day to prevent an immediate rotation.
+                self._time_limit += dt.timedelta(days=1)
+        def should_rotate(self, message, file):
+            file.seek(0, 2)
+            if file.tell() + len(message) > self._size_limit:
+                return True
+            if message.record["time"].timestamp() > self._time_limit.timestamp():
+                self._time_limit += dt.timedelta(days=1)
+                return True
+            return False
 
-    # logfile_name = f'./LOGS/{runtime_name}_{time}.log'
-    logger.add(  # create a new log file for each run of the program
-        f"./LOGS/{RUNTIME_NAME}_{RUNTIME_OS_SAFE_NAME}.log", level="INFO"
+    # set rotate file if over 500 MB or at midnight every day
+    rotator = Rotator(size=5e+8, at=dt.time(0, 0, 0))
+    # example useage: logger.add("file.log", rotation=rotator.should_rotate)    
+
+    # Begin logging definition
+    logger.remove()  # removes the default console logger provided by Loguru.
+    # I find it to be too noisy with details more appropriate for file logging.
+
+    # INFO and messages of higher priority only shown on the console.
+    # it uses the tqdm module .write method to allow tqdm to display correctly.
+    logger.add(lambda msg: tqdm.write(msg, end=""), format="{message}", level="ERROR")
+
+    logger.configure(handlers=[{"sink": os.sys.stderr, "level": "DEBUG"}])  
+    # this method automatically suppresses the default handler to modify the message level
+
+    logger.add(
+        "".join(["./LOGS/", filename, "_{time}.log"]),
+        rotation=rotator.should_rotate,
+        level="DEBUG",
+        encoding="utf8"
     )
+    # create a new log file for each run of the program
+    return
+
+
+@logger.catch
+def Main():
+    defineLoggers(f"{RUNTIME_NAME.stem}_{OS_FILENAME_SAFE_TIMESTR}")
 
     logger.info("Program Start.")  # log the start of the program
 
     process_QBO()
+
+    logger.info("Program End.") 
+
     return
 
 
