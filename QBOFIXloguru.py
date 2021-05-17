@@ -224,7 +224,7 @@ def defineLoggers(filename):
 
 @logger.catch
 def Main():
-    defineLoggers(f"{RUNTIME_NAME.stem}_{OS_FILENAME_SAFE_TIMESTR}")
+    defineLoggers(f"{RUNTIME_NAME}_{OS_FILENAME_SAFE_TIMESTR}")
 
     logger.info("Program Start.")  # log the start of the program
 
