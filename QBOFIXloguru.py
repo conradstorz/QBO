@@ -11,7 +11,22 @@ BASE_DIRECTORY = "G:/Downloads/"
 OUTPUT_DIRECTORY = "C:/Users/Conrad/Documents/"
 
 # text to remove from transaction descriptions
-BAD_TEXT = [r"DEBIT +\d{4}", "CKCD ", "AC-", "POS ", "POS DB ", "-ONLINE", "-ACH"]
+BAD_TEXT = [
+    r"DEBIT +\d{4}",
+    "CKCD ",
+    "AC-",
+    "POS ",
+    "POS DB ",
+    "-ONLINE",
+    "-ACH",
+    "DEBIT",
+    "CREDIT",
+    "ACH",
+    "MISCELLANEOUS",
+    "PREAUTHORIZED",
+    "PURCHASE TERMINAL",
+    "ATM MERCHANT",
+]
 
 
 import os
@@ -183,11 +198,14 @@ def defineLoggers(filename):
         def __init__(self, *, size, at):
             now = dt.datetime.now()
             self._size_limit = size
-            self._time_limit = now.replace(hour=at.hour, minute=at.minute, second=at.second)
+            self._time_limit = now.replace(
+                hour=at.hour, minute=at.minute, second=at.second
+            )
             if now >= self._time_limit:
                 # The current time is already past the target time so it would rotate already.
                 # Add one day to prevent an immediate rotation.
                 self._time_limit += dt.timedelta(days=1)
+
         def should_rotate(self, message, file):
             file.seek(0, 2)
             if file.tell() + len(message) > self._size_limit:
@@ -198,8 +216,8 @@ def defineLoggers(filename):
             return False
 
     # set rotate file if over 500 MB or at midnight every day
-    rotator = Rotator(size=5e+8, at=dt.time(0, 0, 0))
-    # example useage: logger.add("file.log", rotation=rotator.should_rotate)    
+    rotator = Rotator(size=5e8, at=dt.time(0, 0, 0))
+    # example useage: logger.add("file.log", rotation=rotator.should_rotate)
 
     # Begin logging definition
     logger.remove()  # removes the default console logger provided by Loguru.
@@ -209,14 +227,14 @@ def defineLoggers(filename):
     # it uses the tqdm module .write method to allow tqdm to display correctly.
     logger.add(lambda msg: tqdm.write(msg, end=""), format="{message}", level="ERROR")
 
-    logger.configure(handlers=[{"sink": os.sys.stderr, "level": "DEBUG"}])  
+    logger.configure(handlers=[{"sink": os.sys.stderr, "level": "DEBUG"}])
     # this method automatically suppresses the default handler to modify the message level
 
     logger.add(
         "".join(["./LOGS/", filename, "_{time}.log"]),
         rotation=rotator.should_rotate,
         level="DEBUG",
-        encoding="utf8"
+        encoding="utf8",
     )
     # create a new log file for each run of the program
     return
@@ -230,7 +248,7 @@ def Main():
 
     process_QBO()
 
-    logger.info("Program End.") 
+    logger.info("Program End.")
 
     return
 
