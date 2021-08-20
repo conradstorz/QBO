@@ -5,9 +5,9 @@
 
 
 # files to be updated
-FILE_EXT = ".qbo"
+QBO_FILE_EXT = ".qbo"
 DEFAULT_DOWNLOAD_FILENAME = "download.qbo"
-BASE_DIRECTORY = "G:/Downloads/"
+BASE_DIRECTORY = "C:/Users/Conrad/Downloads/"
 OUTPUT_DIRECTORY = "C:/Users/Conrad/Documents/"
 
 # text to remove from transaction descriptions
@@ -15,8 +15,8 @@ BAD_TEXT = [
     r"DEBIT +\d{4}",
     "CKCD ",
     "AC-",
+    "POS DB ",    
     "POS ",
-    "POS DB ",
     "-ONLINE",
     "-ACH",
     "DEBIT",
@@ -26,6 +26,7 @@ BAD_TEXT = [
     "PREAUTHORIZED",
     "PURCHASE TERMINAL",
     "ATM MERCHANT",
+    "AUTOMATIC TRANSFER",
 ]
 
 
@@ -67,18 +68,30 @@ def read_base_file(input_file):
 
 
 @logger.catch
-def Clean_Line(t, line):
+def Clean_Line(bad_word, original_text):
     """Clean_Line(text to be removed, text to have modified)
     Return line with redundant spaces removed and text deleted if exists.
     """
-    line = re.sub(r" +", " ", line)  # remove duplicate spaces from within line
-    # return line.replace(t, "").lstrip()  # strip leading whitespace
-    line = re.sub(t, "", line)
-    return line.strip()
+    stripped_text = re.sub(r" +", " ", original_text)  # remove duplicate spaces from within line
+    cleaned_text = re.sub(bad_word, "", stripped_text)
+    return cleaned_text.strip()
 
 
 @logger.catch
-def clean_qbo_file(lines, text):
+def mylogger(txt):
+    """Strip extra newline character from txt to suppress extra blank lines in output
+
+    Args:
+        txt (string): text to log
+
+    Returns:
+        nothing
+    """
+    logger.info(txt.strip())
+
+
+@logger.catch
+def clean_qbo_file(lines, bad_text):
     """clean_qbo_file(list of lines, list of text strings to remove)
     Remove unwanted text from transaction data from bank download in quickbooks format.
     My bank provides poorly formatted data. Quickbooks loses access to data due to
@@ -98,6 +111,7 @@ def clean_qbo_file(lines, text):
         # in reverse order [::-1] so we process memo before name lines
         logger.debug(current_line)
         if current_line.startswith(NAME_TAG):
+            mylogger(f'ORIGINAL:{current_line}')
             backupname = current_line  # just in case there is no memo line
 
         if current_line.startswith(QBO_FILE_DATE_TAG):
@@ -112,10 +126,11 @@ def clean_qbo_file(lines, text):
             # memo lines contain the desired info about transactions
             # name lines are used by quickbooks to match transactions
             # discard less useful nametag information from bank after cleaning memo info
+            mylogger(current_line)
             current_line = current_line.replace(MEMO_TAG, "").lstrip()  # remove memotag
-            for t in text:
+            for item in bad_text:
                 # remove each occurance from line
-                current_line = Clean_Line(t, current_line)
+                current_line = Clean_Line(item, current_line)
                 logger.debug(current_line)
 
             name_line = NAME_TAG + current_line[:maximum_nametag_line_length] + "\n"
@@ -126,9 +141,13 @@ def clean_qbo_file(lines, text):
 
         logger.debug(current_line)
         if current_line == "<ERROR>":  # there was no memo line
-            logger.info("there was no MEMO line for the current entry.")
+            mylogger("there was no MEMO line for the current entry.")
             current_line = backupname  # so restore the original contents
             logger.debug(backupname + " ...restored")
+
+        if current_line.startswith(NAME_TAG):
+            mylogger(f'FIXED:{current_line}')
+            logger.info('...')
         clean_file_lines.append(current_line)
 
     return (
@@ -137,57 +156,54 @@ def clean_qbo_file(lines, text):
         acct_number,
     )
 
+@logger.catch
+def modify_QBO(QBO_records_list, originalfile_pathobj):
+    modified_qbo, file_date, acct_number = clean_qbo_file(QBO_records_list, BAD_TEXT)
+
+    # Attempt to write results to cleanfile
+    fname = "".join([file_date, "_", acct_number, QBO_FILE_EXT])
+    logger.info(f"Attempting to output to file name: {fname}")
+    clean_output_file = Path(QBO_MODIFIED_DIRECTORY, fname)
+    try:
+        with open(clean_output_file, "w") as f:
+            f.writelines(modified_qbo)
+    except Exception as e:
+        logger.error(f"Error in writing {clean_output_file}")
+        logger.warning(str(e))
+        sys.exit(1)
+
+    logger.info(f"File {clean_output_file} contents written successfully.")
+
+    logger.info(f"Attempting to remove old {originalfile_pathobj} file...")
+
+    if Path(originalfile_pathobj).exists():
+        try:
+            os.remove(originalfile_pathobj)
+        except OSError as e:
+            logger.warning(f"Error: {e.file_path} - {e.strerror}")
+            sys.exit(1)
+        logger.info(f"Success removing {originalfile_pathobj.name}")
+
+    else:
+        logger.info(f"Sorry, I can not find {originalfile_pathobj.name} file.")
+
+    return
+
 
 @logger.catch
 def process_QBO():
-    # Run the processes since that seems to be the purpose
-    while True:
-        # loop until something to process is found
-        logger.info("...checking download directory...")
-        for name in list(QBO_DOWNLOAD_DIRECTORY.glob("*.js")):
-            if name.endswith(".qbo"):
-                print(name)
-        file_pathobj = Path(QBO_DOWNLOAD_DIRECTORY, DEFAULT_DOWNLOAD_FILENAME)
+    logger.info("...checking download directory...")
+    names = list(QBO_DOWNLOAD_DIRECTORY.glob(f'*{QBO_FILE_EXT}'))
+    while names != []:
+        # loop while something to process is found
+        
+        file_pathobj = names.pop()
 
-        originalfile = read_base_file(file_pathobj)
+        original_records_list = read_base_file(file_pathobj)
 
-        if originalfile == []:
-            logger.info(f"File not yet found: {file_pathobj.name}")
-            time.sleep(10)
-        else:
-            # we have a file, try to process
-            result, file_date, acct_number = clean_qbo_file(originalfile, BAD_TEXT)
+        # we have a file, try to process
+        modify_QBO(original_records_list, file_pathobj)
 
-            # Attempt to write results to cleanfile
-            fname = "".join([file_date, "_", acct_number, FILE_EXT])
-            logger.info(f"Attempting to output to file name: {fname}")
-            clean_output_file = Path(QBO_MODIFIED_DIRECTORY, fname)
-            try:
-                with open(clean_output_file, "w") as f:
-                    f.writelines(result)
-            except Exception as e:
-                logger.error(f"Error in writing {clean_output_file}")
-                logger.warning(str(e))
-                sys.exit(1)
-
-            logger.info(f"File {clean_output_file} contents written successfully.")
-
-            logger.info(f"Attempting to remove old {file_pathobj} file...")
-
-            if Path(file_pathobj).exists():
-                try:
-                    os.remove(file_pathobj)
-                except OSError as e:
-                    logger.warning(f"Error: {e.file_path} - {e.strerror}")
-                    sys.exit(1)
-                logger.info(f"Success removing {file_pathobj.name}")
-
-            else:
-                logger.info(f"Sorry, I can not find {file_pathobj.name} file.")
-
-            # declare program end
-            logger.info("Program End: nominal")
-            sys.exit(0)
     return
 
 
@@ -225,9 +241,9 @@ def defineLoggers(filename):
 
     # INFO and messages of higher priority only shown on the console.
     # it uses the tqdm module .write method to allow tqdm to display correctly.
-    logger.add(lambda msg: tqdm.write(msg, end=""), format="{message}", level="ERROR")
+    #logger.add(lambda msg: tqdm.write(msg, end=""), format="{message}", level="ERROR")
 
-    logger.configure(handlers=[{"sink": os.sys.stderr, "level": "DEBUG"}])
+    logger.configure(handlers=[{"sink": os.sys.stderr, "level": "INFO"}])
     # this method automatically suppresses the default handler to modify the message level
 
     logger.add(
@@ -246,7 +262,9 @@ def Main():
 
     logger.info("Program Start.")  # log the start of the program
 
-    process_QBO()
+    while True:
+        process_QBO()
+        time.sleep(10)
 
     logger.info("Program End.")
 
