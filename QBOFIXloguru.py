@@ -7,8 +7,8 @@
 # files to be updated
 QBO_FILE_EXT = ".qbo"
 DEFAULT_DOWNLOAD_FILENAME = "download.qbo"
-BASE_DIRECTORY = "C:/Users/Conrad/Downloads/"
-OUTPUT_DIRECTORY = "C:/Users/Conrad/Documents/"
+BASE_DIRECTORY = "D:/Users/Conrad/Downloads/"
+OUTPUT_DIRECTORY = "D:/Users/Conrad/Documents/"
 
 # text to remove from transaction descriptions
 BAD_TEXT = [
