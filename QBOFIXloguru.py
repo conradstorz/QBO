@@ -34,6 +34,7 @@ import os
 import re
 import sys
 import time
+import copy
 from loguru import logger
 import datetime as dt
 from pathlib import Path
@@ -112,7 +113,7 @@ def clean_qbo_file(lines, bad_text):
         logger.debug(current_line)
         if current_line.startswith(NAME_TAG):
             mylogger(f'ORIGINAL:{current_line}')
-            backupname = current_line  # just in case there is no memo line
+            backupname = copy.deepcopy(current_line.replace(NAME_TAG, "").lstrip())  # to place in the memo line
 
         if current_line.startswith(QBO_FILE_DATE_TAG):
             # extract file date for use with naming output file
@@ -125,7 +126,7 @@ def clean_qbo_file(lines, bad_text):
         if current_line.startswith(MEMO_TAG):
             # memo lines contain the desired info about transactions
             # name lines are used by quickbooks to match transactions
-            # discard less useful nametag information from bank after cleaning memo info
+            # set memotag to less useful nametag information from bank after cleaning memo info
             mylogger(current_line)
             current_line = current_line.replace(MEMO_TAG, "").lstrip()  # remove memotag
             for item in bad_text:
@@ -133,8 +134,12 @@ def clean_qbo_file(lines, bad_text):
                 current_line = Clean_Line(item, current_line)
                 logger.debug(current_line)
 
+            # edge case error: if memo was blank QBO file cannot have empty nametag. It will fail to process.
+            if len(current_line) < 1:
+                current_line = "BLANK"
+
             name_line = NAME_TAG + current_line[:maximum_nametag_line_length] + "\n"
-            current_line = MEMO_TAG + current_line + "\n"  # replace memotag
+            current_line = MEMO_TAG + backupname  # replace memotag with original nametag
 
         if current_line.startswith(NAME_TAG):
             current_line = name_line  # replace nameline with memoline
@@ -148,6 +153,8 @@ def clean_qbo_file(lines, bad_text):
         if current_line.startswith(NAME_TAG):
             mylogger(f'FIXED:{current_line}')
             logger.info('...')
+
+        # place this line into the desired output result    
         clean_file_lines.append(current_line)
 
     return (
