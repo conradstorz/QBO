@@ -15,7 +15,7 @@ BAD_TEXT = [
     r"DEBIT +\d{4}",
     "CKCD ",
     "AC-",
-    "POS DB ",    
+    "POS DB ",
     "POS ",
     "-ONLINE",
     "-ACH",
@@ -73,7 +73,9 @@ def Clean_Line(bad_word, original_text):
     """Clean_Line(text to be removed, text to have modified)
     Return line with redundant spaces removed and text deleted if exists.
     """
-    stripped_text = re.sub(r" +", " ", original_text)  # remove duplicate spaces from within line
+    stripped_text = re.sub(
+        r" +", " ", original_text
+    )  # remove duplicate spaces from within line
     cleaned_text = re.sub(bad_word, "", stripped_text)
     return cleaned_text.strip()
 
@@ -112,8 +114,10 @@ def clean_qbo_file(lines, bad_text):
         # in reverse order [::-1] so we process memo before name lines
         logger.debug(current_line)
         if current_line.startswith(NAME_TAG):
-            mylogger(f'ORIGINAL:{current_line}')
-            backupname = copy.deepcopy(current_line.replace(NAME_TAG, "").lstrip())  # to place in the memo line
+            mylogger(f"ORIGINAL:{current_line}")
+            backupname = copy.deepcopy(
+                current_line.replace(NAME_TAG, "").lstrip()
+            )  # to place in the memo line
 
         if current_line.startswith(QBO_FILE_DATE_TAG):
             # extract file date for use with naming output file
@@ -139,7 +143,9 @@ def clean_qbo_file(lines, bad_text):
                 current_line = "BLANK"
 
             name_line = NAME_TAG + current_line[:maximum_nametag_line_length] + "\n"
-            current_line = MEMO_TAG + backupname  # replace memotag with original nametag
+            current_line = (
+                MEMO_TAG + backupname
+            )  # replace memotag with original nametag
 
         if current_line.startswith(NAME_TAG):
             current_line = name_line  # replace nameline with memoline
@@ -151,10 +157,10 @@ def clean_qbo_file(lines, bad_text):
             logger.debug(backupname + " ...restored")
 
         if current_line.startswith(NAME_TAG):
-            mylogger(f'FIXED:{current_line}')
-            logger.info('...')
+            mylogger(f"FIXED:{current_line}")
+            logger.info("...")
 
-        # place this line into the desired output result    
+        # place this line into the desired output result
         clean_file_lines.append(current_line)
 
     return (
@@ -162,6 +168,7 @@ def clean_qbo_file(lines, bad_text):
         file_date,
         acct_number,
     )
+
 
 @logger.catch
 def modify_QBO(QBO_records_list, originalfile_pathobj):
@@ -200,10 +207,10 @@ def modify_QBO(QBO_records_list, originalfile_pathobj):
 @logger.catch
 def process_QBO():
     logger.info("...checking download directory...")
-    names = list(QBO_DOWNLOAD_DIRECTORY.glob(f'*{QBO_FILE_EXT}'))
+    names = list(QBO_DOWNLOAD_DIRECTORY.glob(f"*{QBO_FILE_EXT}"))
     while names != []:
         # loop while something to process is found
-        
+
         file_pathobj = names.pop()
 
         original_records_list = read_base_file(file_pathobj)
@@ -248,7 +255,7 @@ def defineLoggers(filename):
 
     # INFO and messages of higher priority only shown on the console.
     # it uses the tqdm module .write method to allow tqdm to display correctly.
-    #logger.add(lambda msg: tqdm.write(msg, end=""), format="{message}", level="ERROR")
+    # logger.add(lambda msg: tqdm.write(msg, end=""), format="{message}", level="ERROR")
 
     logger.configure(handlers=[{"sink": os.sys.stderr, "level": "INFO"}])
     # this method automatically suppresses the default handler to modify the message level
