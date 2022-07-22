@@ -95,6 +95,7 @@ def mylogger(txt):
 
 @logger.catch
 def clean_qbo_file(lines, bad_text):
+    # TODO 20220721 Fix this crappy routine. It is currently leaking info from one transaction into the next. The <REFNUM> from the previous transaction is being placed as the MEMO of the next item processed.
     """clean_qbo_file(list of lines, list of text strings to remove)
     Remove unwanted text from transaction data from bank download in quickbooks format.
     My bank provides poorly formatted data. Quickbooks loses access to data due to
@@ -108,13 +109,12 @@ def clean_qbo_file(lines, bad_text):
     MEMO_TAG = "<MEMO>"
     NAME_TAG = "<NAME>"
     name_line = "<ERROR>"
-    backupname = "<MEMO>"
+    backupname = "BLANK" + "\n"
     clean_file_lines = []
     for current_line in lines[::-1]:
         # in reverse order [::-1] so we process memo before name lines
-        logger.debug(current_line)
+        mylogger(f"ORIGINAL:{current_line}")
         if current_line.startswith(NAME_TAG):
-            mylogger(f"ORIGINAL:{current_line}")
             backupname = copy.deepcopy(
                 current_line.replace(NAME_TAG, "").lstrip()
             )  # to place in the memo line
@@ -131,37 +131,33 @@ def clean_qbo_file(lines, bad_text):
             # memo lines contain the desired info about transactions
             # name lines are used by quickbooks to match transactions
             # set memotag to less useful nametag information from bank after cleaning memo info
-            mylogger(current_line)
+            # ^^^ do not change memo line 20220722
             current_line = current_line.replace(MEMO_TAG, "").lstrip()  # remove memotag
             for item in bad_text:
                 # remove each occurance from line
                 current_line = Clean_Line(item, current_line)
-                logger.debug(current_line)
+                # logger.debug(current_line)
 
             # edge case error: if memo was blank QBO file cannot have empty nametag. It will fail to process.
             if len(current_line) < 1:
                 current_line = "BLANK"
 
+            # save the cleaned memo line for use with the name line that comes next in the processing
             name_line = NAME_TAG + current_line[:maximum_nametag_line_length] + "\n"
-            current_line = (
-                MEMO_TAG + backupname
-            )  # replace memotag with original nametag
+            
+            # 20220722 removed. does not work. current_line = (MEMO_TAG + backupname)  # replace memotag with original nametag
 
         if current_line.startswith(NAME_TAG):
             current_line = name_line  # replace nameline with memoline
 
-        logger.debug(current_line)
         if current_line == "<ERROR>":  # there was no memo line
             mylogger("there was no MEMO line for the current entry.")
             current_line = backupname  # so restore the original contents
-            logger.debug(backupname + " ...restored")
-
-        if current_line.startswith(NAME_TAG):
-            mylogger(f"FIXED:{current_line}")
-            logger.info("...")
+            logger.debug(f'{backupname}...restored')
 
         # place this line into the desired output result
         clean_file_lines.append(current_line)
+        mylogger(f"FIXED:{current_line}")
 
     return (
         clean_file_lines[::-1],  # return lines in same order as submitted
