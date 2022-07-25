@@ -99,9 +99,19 @@ def clean_qbo_file(lines, bad_text):
     """clean_qbo_file(list of lines, list of text strings to remove)
     Remove unwanted text from transaction data from bank download in quickbooks format.
     My bank provides poorly formatted data. Quickbooks loses access to data due to
-    the fact that the memo line has a longer line length allowed by quickbooks.
-    This function replaces the nametag with the cleaned memotag data.
+    the fact that the memo line has a longer line length than allowed by quickbooks.
+    This function replaces the nametag with the cleaned memotag data and the memotag becomes the value of the original nametag.
+
+    Steps:
+        import the strings to identify the transactions.
+        copy the memo and clean out all the verbose stings (BAD_TEXT) and truncate to the quickbooks limit.
+        NOTE: BAD_TEXT should be formatted as {'match_string': 'replacement_string'}
+        set the memo equal to the value of original transaction name.
+        set the name equal to the value of the cleaned memo line.
+
     """
+    TRANS_START_TAG = "<STMTTRN>"
+    TRANS_END_TAG = "</STMTTRN>"
     QBO_FILE_DATE_TAG = "<DTEND>"
     ACCOUNT_NUMBER_TAG = "<ACCTID>"
     file_date, acct_number = "nodate", "nonumber"
@@ -111,6 +121,49 @@ def clean_qbo_file(lines, bad_text):
     name_line = "<ERROR>"
     backupname = "BLANK" + "\n"
     clean_file_lines = []
+    """
+    while lines != []:
+        # pop first line
+        line = lines.pop()
+
+        # monitor data stream for date and acct number
+        if line.startswith(QBO_FILE_DATE_TAG):
+            # extract file date for use with naming output file
+            file_date = line.replace(QBO_FILE_DATE_TAG, "").lstrip().rstrip()
+
+        if line.startswith(ACCOUNT_NUMBER_TAG):
+            # extract bank account number for use in naming output file
+            acct_number = line.replace(ACCOUNT_NUMBER_TAG, "").lstrip().rstrip()
+
+        # classify as data or transaction
+        if line.startswith(TRANS_START_TAG) == False:
+            # place data into output list immeadiately
+            clean_file_lines.append(line)
+        else:
+            # load transaction into temp storage
+            transaction_lines = []
+            while line.startswith(TRANS_END_TAG) == False:
+                transaction_lines.append(line)
+                line = lines.pop()
+
+            # process memo data
+            memo_data = line with memo tag
+            memo_data = memo_data.replace(MEMO_TAG, "").lstrip()  # remove memotag
+            for item in bad_text:
+                # remove each occurance from line
+                memo_data = Clean_Line(item, memo_data)            
+            
+            # place name value into memo line
+            
+            # place cleaned memo data into name line
+            
+            # truncate name to quickbooks limit
+            
+            # place transaction data into output list now
+
+            # place TRANS_END_TAG into output list
+            transaction_lines.append(line)
+    """
     for current_line in lines[::-1]:
         # in reverse order [::-1] so we process memo before name lines
         mylogger(f"ORIGINAL:{current_line}")
@@ -144,7 +197,7 @@ def clean_qbo_file(lines, bad_text):
 
             # save the cleaned memo line for use with the name line that comes next in the processing
             name_line = NAME_TAG + current_line[:maximum_nametag_line_length] + "\n"
-            
+
             # 20220722 removed. does not work. current_line = (MEMO_TAG + backupname)  # replace memotag with original nametag
 
         if current_line.startswith(NAME_TAG):
@@ -168,6 +221,13 @@ def clean_qbo_file(lines, bad_text):
 
 @logger.catch
 def modify_QBO(QBO_records_list, originalfile_pathobj):
+    """Take a list of strings from a QBO file format and improve transaction names and memos.
+    Wesbanco Bank places all useful info into the memo line. Quickbooks processes transactions based on the names.
+    Wesbanco places verbose human readable descriptions in the memo line and a simple transaction number in the name.
+    Let's swap those to help quickbooks process the transactions and categorize them.
+    Quickbooks limits names of transactions to 32 characters so let's remove the verbose language from the original memos.
+    """
+
     modified_qbo, file_date, acct_number = clean_qbo_file(QBO_records_list, BAD_TEXT)
 
     # Attempt to write results to cleanfile
@@ -272,7 +332,7 @@ def Main():
 
     logger.info("Program Start.")  # log the start of the program
 
-    while True:
+    while True: # loop until user intervention
         process_QBO()
         time.sleep(10)
 
