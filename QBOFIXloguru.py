@@ -121,10 +121,11 @@ def clean_qbo_file(lines, bad_text):
     name_line = "<ERROR>"
     backupname = "BLANK" + "\n"
     clean_file_lines = []
-    """
+
     while lines != []:
         # pop first line
         line = lines.pop()
+        mylogger(f"INPUT:{line}")
 
         # monitor data stream for date and acct number
         if line.startswith(QBO_FILE_DATE_TAG):
@@ -138,6 +139,7 @@ def clean_qbo_file(lines, bad_text):
         # classify as data or transaction
         if line.startswith(TRANS_START_TAG) == False:
             # place data into output list immeadiately
+            mylogger(f"OUTPUT:{line}")
             clean_file_lines.append(line)
         else:
             # load transaction into temp storage
@@ -145,72 +147,40 @@ def clean_qbo_file(lines, bad_text):
             while line.startswith(TRANS_END_TAG) == False:
                 transaction_lines.append(line)
                 line = lines.pop()
+                mylogger(f"INPUT:{line}")
+
+            # find memo and name items in transaction
+            memo_data_index = -1
+            name_data_index = -1
+            for indx, item in enumerate(transaction_lines):
+                if item.startswith(MEMO_TAG):
+                    memo_data_index = indx
+                if item.startswith(NAME_TAG):
+                    name_data_index = indx
 
             # process memo data
-            memo_data = line with memo tag
-            memo_data = memo_data.replace(MEMO_TAG, "").lstrip()  # remove memotag
+            if memo_data_index == -1: # This is an edgecase where the bank didn't include a memo line.
+                memo_data = 'BLANK'
+            else:
+                memo_data = transaction_lines[memo_data_index].replace(MEMO_TAG, "").lstrip()  # remove memotag
             for item in bad_text:
-                # remove each occurance from line
+                # remove each occurance from the memo data
                 memo_data = Clean_Line(item, memo_data)            
             
             # place name value into memo line
-            
-            # place cleaned memo data into name line
-            
-            # truncate name to quickbooks limit
-            
+            if name_data_index == -1: # This edgecase has never happend in my experience.
+                name_data = 'BLANK'
+            else:
+                name_data = transaction_lines[name_data_index].replace(NAME_TAG, "").lstrip()  # remove nametag
+            transaction_lines[memo_data_index] = MEMO_TAG + name_data + "\n"
+                        
+            # place cleaned memo data into name line and truncate length to quickbooks limit
+            transaction_lines[name_data_index] = NAME_TAG + memo_data[:maximum_nametag_line_length] + "\n"
+
             # place transaction data into output list now
-
-            # place TRANS_END_TAG into output list
-            transaction_lines.append(line)
-    """
-    for current_line in lines[::-1]:
-        # in reverse order [::-1] so we process memo before name lines
-        mylogger(f"ORIGINAL:{current_line}")
-        if current_line.startswith(NAME_TAG):
-            backupname = copy.deepcopy(
-                current_line.replace(NAME_TAG, "").lstrip()
-            )  # to place in the memo line
-
-        if current_line.startswith(QBO_FILE_DATE_TAG):
-            # extract file date for use with naming output file
-            file_date = current_line.replace(QBO_FILE_DATE_TAG, "").lstrip().rstrip()
-
-        if current_line.startswith(ACCOUNT_NUMBER_TAG):
-            # extract bank account number for use in naming output file
-            acct_number = current_line.replace(ACCOUNT_NUMBER_TAG, "").lstrip().rstrip()
-
-        if current_line.startswith(MEMO_TAG):
-            # memo lines contain the desired info about transactions
-            # name lines are used by quickbooks to match transactions
-            # set memotag to less useful nametag information from bank after cleaning memo info
-            # ^^^ do not change memo line 20220722
-            current_line = current_line.replace(MEMO_TAG, "").lstrip()  # remove memotag
-            for item in bad_text:
-                # remove each occurance from line
-                current_line = Clean_Line(item, current_line)
-                # logger.debug(current_line)
-
-            # edge case error: if memo was blank QBO file cannot have empty nametag. It will fail to process.
-            if len(current_line) < 1:
-                current_line = "BLANK"
-
-            # save the cleaned memo line for use with the name line that comes next in the processing
-            name_line = NAME_TAG + current_line[:maximum_nametag_line_length] + "\n"
-
-            # 20220722 removed. does not work. current_line = (MEMO_TAG + backupname)  # replace memotag with original nametag
-
-        if current_line.startswith(NAME_TAG):
-            current_line = name_line  # replace nameline with memoline
-
-        if current_line == "<ERROR>":  # there was no memo line
-            mylogger("there was no MEMO line for the current entry.")
-            current_line = backupname  # so restore the original contents
-            logger.debug(f'{backupname}...restored')
-
-        # place this line into the desired output result
-        clean_file_lines.append(current_line)
-        mylogger(f"FIXED:{current_line}")
+            for item in transaction_lines:
+                clean_file_lines.append(item)
+                mylogger(f"OUTPUT:{line}")
 
     return (
         clean_file_lines[::-1],  # return lines in same order as submitted
