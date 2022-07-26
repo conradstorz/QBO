@@ -30,6 +30,7 @@ BAD_TEXT = [
 ]
 
 
+from ast import Raise
 import os
 import re
 import sys
@@ -117,6 +118,7 @@ def clean_qbo_file(lines, bad_text):
     maximum_nametag_line_length = 32
     MEMO_TAG = "<MEMO>"
     NAME_TAG = "<NAME>"
+    REFNUM_TAG = "<REFNUM>"
     clean_file_lines = []
 
     while lines != []:
@@ -128,12 +130,12 @@ def clean_qbo_file(lines, bad_text):
         if line.startswith(QBO_FILE_DATE_TAG):
             # extract file date for use with naming output file
             file_date = line.replace(QBO_FILE_DATE_TAG, "").lstrip().rstrip()
-            logger.info('Date Found:{file_date}')
+            logger.info("Date Found:{file_date}")
 
         if line.startswith(ACCOUNT_NUMBER_TAG):
             # extract bank account number for use in naming output file
             acct_number = line.replace(ACCOUNT_NUMBER_TAG, "").lstrip().rstrip()
-            logger.info(f'Account Number found:{acct_number}')
+            logger.info(f"Account Number found:{acct_number}")
 
         # monitor for transaction start
         if line.startswith(TRANS_START_TAG) == True:
@@ -148,6 +150,7 @@ def clean_qbo_file(lines, bad_text):
             # find memo and name items in transaction
             memo_data_index = -1
             name_data_index = -1
+            refnum_data_index = -1
             for indx, item in enumerate(transaction_lines):
                 if item.startswith(MEMO_TAG):
                     logger.info(f"MEMO line is index::{indx}")
@@ -155,28 +158,46 @@ def clean_qbo_file(lines, bad_text):
                 if item.startswith(NAME_TAG):
                     logger.info(f"NAME line is index::{indx}")
                     name_data_index = indx
+                if item.startswith(REFNUM_TAG):
+                    logger.info(f"REFNUM line is index::{indx}")
+                    refnum_data_index = indx
+
+            # EDGE CASES
+            if memo_data_index == -1:  # there is no memo line in the bank download
+                memo_data_index = refnum_data_index + 2
+                transaction_lines.insert(
+                    refnum_data_index + 2,
+                    f"{transaction_lines[refnum_data_index].replace(REFNUM_TAG, '').lstrip()}",
+                )
+                logger.info("MEMO is missing from the current transaction.")
+            if name_data_index == -1:  # This has never happened in my experience
+                name_data_index = refnum_data_index + 1
+                transaction_lines.insert(refnum_data_index + 1, f"BLANK\n")
+                logger.info("NAME is missing from the current transaction.")
 
             # process memo data
-            if memo_data_index == -1: # This is an edgecase where the bank didn't include a memo line.
-                memo_data = 'BLANK'
-            else:
-                memo_data = transaction_lines[memo_data_index].replace(MEMO_TAG, "").lstrip()  # remove memotag
+            memo_data = (
+                transaction_lines[memo_data_index].replace(MEMO_TAG, "").lstrip()
+            )  # remove memotag
             logger.info(f"Removing bad text...")
             for item in bad_text:
                 # remove each occurance from the memo data
-                memo_data = Clean_Line(item, memo_data)            
-            
+                memo_data = Clean_Line(item, memo_data)
+
             # place name value into memo line
-            if name_data_index == -1: # This edgecase has never happend in my experience.
-                name_data = 'BLANK'
-            else:
-                name_data = transaction_lines[name_data_index].replace(NAME_TAG, "").lstrip()  # remove nametag
+            name_data = (
+                transaction_lines[name_data_index].replace(NAME_TAG, "").lstrip()
+            )  # remove nametag
             logger.info(f"Saving new memo:{name_data}")
-            transaction_lines[memo_data_index] = MEMO_TAG + name_data # name data still has carriage return and does not need it added like the memo_data variable does.
-                        
+            transaction_lines[memo_data_index] = (
+                MEMO_TAG + name_data
+            )  # name data still has carriage return and does not need it added like the memo_data variable does.
+
             # place cleaned memo data into name line and truncate length to quickbooks limit
             logger.info(f"Saving new name:{memo_data}")
-            transaction_lines[name_data_index] = NAME_TAG + memo_data[:maximum_nametag_line_length] + "\n"
+            transaction_lines[name_data_index] = (
+                NAME_TAG + memo_data[:maximum_nametag_line_length] + "\n"
+            )
 
             # place transaction data into output list now
             for item in transaction_lines:
@@ -307,7 +328,7 @@ def Main():
 
     logger.info("Program Start.")  # log the start of the program
 
-    #while True: # loop until user intervention
+    # while True: # loop until user intervention
     process_QBO()
     #    time.sleep(10)
 
