@@ -95,7 +95,6 @@ def mylogger(txt):
 
 @logger.catch
 def clean_qbo_file(lines, bad_text):
-    # TODO 20220721 Fix this crappy routine. It is currently leaking info from one transaction into the next. The <REFNUM> from the previous transaction is being placed as the MEMO of the next item processed.
     """clean_qbo_file(list of lines, list of text strings to remove)
     Remove unwanted text from transaction data from bank download in quickbooks format.
     My bank provides poorly formatted data. Quickbooks loses access to data due to
@@ -105,7 +104,7 @@ def clean_qbo_file(lines, bad_text):
     Steps:
         import the strings to identify the transactions.
         copy the memo and clean out all the verbose stings (BAD_TEXT) and truncate to the quickbooks limit.
-        NOTE: BAD_TEXT should be formatted as {'match_string': 'replacement_string'}
+        NOTE: TODO: BAD_TEXT should be formatted as {'match_string': 'replacement_string'}
         set the memo equal to the value of original transaction name.
         set the name equal to the value of the cleaned memo line.
 
@@ -118,44 +117,43 @@ def clean_qbo_file(lines, bad_text):
     maximum_nametag_line_length = 32
     MEMO_TAG = "<MEMO>"
     NAME_TAG = "<NAME>"
-    name_line = "<ERROR>"
-    backupname = "BLANK" + "\n"
     clean_file_lines = []
 
     while lines != []:
         # pop first line
-        line = lines.pop()
-        mylogger(f"INPUT:{line}")
+        line = lines.pop(0)
+        logger.info(f"INPUT:{line}")
 
         # monitor data stream for date and acct number
         if line.startswith(QBO_FILE_DATE_TAG):
             # extract file date for use with naming output file
             file_date = line.replace(QBO_FILE_DATE_TAG, "").lstrip().rstrip()
+            logger.info('Date Found:{file_date}')
 
         if line.startswith(ACCOUNT_NUMBER_TAG):
             # extract bank account number for use in naming output file
             acct_number = line.replace(ACCOUNT_NUMBER_TAG, "").lstrip().rstrip()
+            logger.info(f'Account Number found:{acct_number}')
 
-        # classify as data or transaction
-        if line.startswith(TRANS_START_TAG) == False:
-            # place data into output list immeadiately
-            mylogger(f"OUTPUT:{line}")
-            clean_file_lines.append(line)
-        else:
+        # monitor for transaction start
+        if line.startswith(TRANS_START_TAG) == True:
+            logger.info(f"Transaction found...")
             # load transaction into temp storage
             transaction_lines = []
             while line.startswith(TRANS_END_TAG) == False:
                 transaction_lines.append(line)
-                line = lines.pop()
-                mylogger(f"INPUT:{line}")
+                line = lines.pop(0)
+                logger.info(f"INPUT:{line}")
 
             # find memo and name items in transaction
             memo_data_index = -1
             name_data_index = -1
             for indx, item in enumerate(transaction_lines):
                 if item.startswith(MEMO_TAG):
+                    logger.info(f"MEMO line is index::{indx}")
                     memo_data_index = indx
                 if item.startswith(NAME_TAG):
+                    logger.info(f"NAME line is index::{indx}")
                     name_data_index = indx
 
             # process memo data
@@ -163,6 +161,7 @@ def clean_qbo_file(lines, bad_text):
                 memo_data = 'BLANK'
             else:
                 memo_data = transaction_lines[memo_data_index].replace(MEMO_TAG, "").lstrip()  # remove memotag
+            logger.info(f"Removing bad text...")
             for item in bad_text:
                 # remove each occurance from the memo data
                 memo_data = Clean_Line(item, memo_data)            
@@ -172,18 +171,24 @@ def clean_qbo_file(lines, bad_text):
                 name_data = 'BLANK'
             else:
                 name_data = transaction_lines[name_data_index].replace(NAME_TAG, "").lstrip()  # remove nametag
-            transaction_lines[memo_data_index] = MEMO_TAG + name_data + "\n"
+            logger.info(f"Saving new memo:{name_data}")
+            transaction_lines[memo_data_index] = MEMO_TAG + name_data # name data still has carriage return and does not need it added like the memo_data variable does.
                         
             # place cleaned memo data into name line and truncate length to quickbooks limit
+            logger.info(f"Saving new name:{memo_data}")
             transaction_lines[name_data_index] = NAME_TAG + memo_data[:maximum_nametag_line_length] + "\n"
 
             # place transaction data into output list now
             for item in transaction_lines:
                 clean_file_lines.append(item)
-                mylogger(f"OUTPUT:{line}")
+                logger.info(f"OUTPUT:{item}")
+
+        # place data into output list
+        logger.info(f"OUTPUT:{line}")
+        clean_file_lines.append(line)
 
     return (
-        clean_file_lines[::-1],  # return lines in same order as submitted
+        clean_file_lines,  # return lines in same order as submitted
         file_date,
         acct_number,
     )
@@ -302,9 +307,9 @@ def Main():
 
     logger.info("Program Start.")  # log the start of the program
 
-    while True: # loop until user intervention
-        process_QBO()
-        time.sleep(10)
+    #while True: # loop until user intervention
+    process_QBO()
+    #    time.sleep(10)
 
     logger.info("Program End.")
 
