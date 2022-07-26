@@ -11,6 +11,7 @@ BASE_DIRECTORY = "D:/Users/Conrad/Downloads/"
 OUTPUT_DIRECTORY = "D:/Users/Conrad/Documents/"
 
 # text to remove from transaction descriptions
+# TODO: make this a dict with contractions as available replacement strings not just ""
 BAD_TEXT = [
     r"DEBIT +\d{4}",
     "CKCD ",
