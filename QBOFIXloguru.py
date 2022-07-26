@@ -108,6 +108,8 @@ def clean_qbo_file(lines, bad_text):
         NOTE: TODO: BAD_TEXT should be formatted as {'match_string': 'replacement_string'}
         set the memo equal to the value of original transaction name.
         set the name equal to the value of the cleaned memo line.
+        TODO: Implement a list of rules for identifing transactions and improving the data.
+            e.g. An amount match for transactions to give them a unique name (quickbooks only matches on names)
 
     """
     TRANS_START_TAG = "<STMTTRN>"
@@ -124,18 +126,18 @@ def clean_qbo_file(lines, bad_text):
     while lines != []:
         # pop first line
         line = lines.pop(0)
-        logger.info(f"INPUT:{line}")
+        logger.info(f"INPUT:{line.strip()}")
 
         # monitor data stream for date and acct number
         if line.startswith(QBO_FILE_DATE_TAG):
             # extract file date for use with naming output file
             file_date = line.replace(QBO_FILE_DATE_TAG, "").lstrip().rstrip()
-            logger.info("Date Found:{file_date}")
+            logger.info(f"Date Found:{file_date.strip()}")
 
         if line.startswith(ACCOUNT_NUMBER_TAG):
             # extract bank account number for use in naming output file
             acct_number = line.replace(ACCOUNT_NUMBER_TAG, "").lstrip().rstrip()
-            logger.info(f"Account Number found:{acct_number}")
+            logger.info(f"Account Number found:{acct_number.strip()}")
 
         # monitor for transaction start
         if line.startswith(TRANS_START_TAG) == True:
@@ -145,7 +147,7 @@ def clean_qbo_file(lines, bad_text):
             while line.startswith(TRANS_END_TAG) == False:
                 transaction_lines.append(line)
                 line = lines.pop(0)
-                logger.info(f"INPUT:{line}")
+                logger.info(f"INPUT:{line.strip()}")
 
             # find memo and name items in transaction
             memo_data_index = -1
@@ -188,24 +190,28 @@ def clean_qbo_file(lines, bad_text):
             name_data = (
                 transaction_lines[name_data_index].replace(NAME_TAG, "").lstrip()
             )  # remove nametag
-            logger.info(f"Saving new memo:{name_data}")
+            logger.info(f"Saving new memo:{name_data.strip()}")
             transaction_lines[memo_data_index] = (
                 MEMO_TAG + name_data
             )  # name data still has carriage return and does not need it added like the memo_data variable does.
 
             # place cleaned memo data into name line and truncate length to quickbooks limit
-            logger.info(f"Saving new name:{memo_data}")
+            logger.info(f"Saving new name:{memo_data.strip()}")
             transaction_lines[name_data_index] = (
                 NAME_TAG + memo_data[:maximum_nametag_line_length] + "\n"
             )
 
+            # EDGE CASE: If name and memo are equal to "CHECK PAID" set memo to refnum.
+            if transaction_lines[name_data_index].replace(NAME_TAG, "").lstrip() == transaction_lines[memo_data_index].replace(MEMO_TAG, ""):
+                transaction_lines[memo_data_index] = (MEMO_TAG + transaction_lines[refnum_data_index].replace(REFNUM_TAG, '').lstrip())
+
             # place transaction data into output list now
             for item in transaction_lines:
                 clean_file_lines.append(item)
-                logger.info(f"OUTPUT:{item}")
+                logger.info(f"OUTPUT:{item.strip()}")
 
         # place data into output list
-        logger.info(f"OUTPUT:{line}")
+        logger.info(f"OUTPUT:{line.strip()}")
         clean_file_lines.append(line)
 
     return (
