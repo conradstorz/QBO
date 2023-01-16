@@ -167,27 +167,34 @@ def clean_qbo_file(lines, bad_text):
 
             # EDGE CASES
             if memo_data_index == -1:  # there is no memo line in the bank download
+                logger.info("MEMO is missing from the current transaction.")
                 memo_data_index = refnum_data_index + 2
                 transaction_lines.insert(
                     refnum_data_index + 2,
                     f"{transaction_lines[refnum_data_index].replace(REFNUM_TAG, '').lstrip()}",
                 )
-                logger.info("MEMO is missing from the current transaction.")
+                
             if name_data_index == -1:  # This has never happened in my experience
+                logger.info("NAME is missing from the current transaction.")
                 name_data_index = refnum_data_index + 1
                 transaction_lines.insert(refnum_data_index + 1, f"BLANK\n")
-                logger.info("NAME is missing from the current transaction.")
 
             # process memo data
             memo_data = (
                 transaction_lines[memo_data_index].replace(MEMO_TAG, "").lstrip()
             )  # remove memotag
-            logger.info(f"Removing bad text...")
+            logger.info(f"Removing bad text from memo line...")
             for item in bad_text:
                 # remove each occurance from the memo data
                 memo_data = Clean_Line(item, memo_data)
+                # EDGE CASE: do not allow memo to be empty
+            logger.info(f'ORIGINAL: {transaction_lines[memo_data_index].replace(MEMO_TAG, "").lstrip()}')
+            logger.info(f' CLEANED: {memo_data}')
+            if len(memo_data) < 1:
+                logger.info('NOTE: memo line contained no text after cleaning.')
+                memo_data = 'NOTHING USEFUL'
 
-            # place name value into memo line
+            # place name value into memo line because my bank puts them in the wrong places
             name_data = (
                 transaction_lines[name_data_index].replace(NAME_TAG, "").lstrip()
             )  # remove nametag
@@ -202,9 +209,11 @@ def clean_qbo_file(lines, bad_text):
                 NAME_TAG + memo_data[:maximum_nametag_line_length] + "\n"
             )
 
-            # EDGE CASE: If name and memo are equal to "CHECK PAID" set memo to refnum.
+            # EDGE CASE: If name and memo are equal set memo to refnum and name to "COLLISION".
             if transaction_lines[name_data_index].replace(NAME_TAG, "").lstrip() == transaction_lines[memo_data_index].replace(MEMO_TAG, ""):
+                logger.info(f'EDGE CASE found: name and memo are identical. {transaction_lines[name_data_index].replace(NAME_TAG, "").lstrip()}')
                 transaction_lines[memo_data_index] = (MEMO_TAG + transaction_lines[refnum_data_index].replace(REFNUM_TAG, '').lstrip())
+                transaction_lines[name_data_index] = (NAME_TAG + "COLLISION")
 
             # place transaction data into output list now
             for item in transaction_lines:
