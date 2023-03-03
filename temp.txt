@@ -1,0 +1,15 @@
+Could not build the ssl module!
+Python requires an OpenSSL 1.0.2 or 1.1 compatible libssl with X509_VERIFY_PARAM_set1_host().
+LibreSSL 2.6.4 and earlier do not provide the necessary APIs, https://github.com/libressl-portable/portable/issues/381
+
+
+Python build finished successfully!
+The necessary bits to build these optional modules were not found:
+_hashlib              _ssl
+To find the necessary bits, look in setup.py in detect_modules() for the module's name.
+
+
+The following modules found by detect_modules() in setup.py, have been
+built by the Makefile instead, as configured by the Setup files:
+_abc                  atexit                pwd
+time
