@@ -31,12 +31,9 @@ BAD_TEXT = [
 ]
 
 
-from ast import Raise
 import os
 import re
 import sys
-import time
-import copy
 from loguru import logger
 import datetime as dt
 from pathlib import Path
