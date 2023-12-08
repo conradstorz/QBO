@@ -350,7 +350,171 @@ def Main():
     return
 
 
-"""Check if this file is being run directly
+"""Check if this file is being run directly and activate main function if so.
 """
 if __name__ == "__main__":
     Main()
+
+
+"""12/8/2023 asked chatgpt to refactor the clean_qbo_file function. The result is below.
+
+import re
+
+def parse_qbo_data(lines):
+    file_date, acct_number = "nodate", "nonumber"
+    clean_file_lines = []
+
+    for line in lines:
+        if line.startswith("<DTEND>"):
+            file_date = line.replace("<DTEND>", "").strip()
+        elif line.startswith("<ACCTID>"):
+            acct_number = line.replace("<ACCTID>", "").strip()
+        clean_file_lines.append(line)
+
+    return file_date, acct_number, clean_file_lines
+
+def clean_memo_and_name(transaction_lines, bad_text, maximum_nametag_line_length):
+    MEMO_TAG = "<MEMO>"
+    NAME_TAG = "<NAME>"
+    REFNUM_TAG = "<REFNUM>"
+
+    memo_data_index = -1
+    name_data_index = -1
+    refnum_data_index = -1
+
+    for indx, item in enumerate(transaction_lines):
+        if item.startswith(MEMO_TAG):
+            memo_data_index = indx
+        if item.startswith(NAME_TAG):
+            name_data_index = indx
+        if item.startswith(REFNUM_TAG):
+            refnum_data_index = indx
+
+    if memo_data_index == -1:
+        memo_data_index = refnum_data_index + 2
+        transaction_lines.insert(
+            refnum_data_index + 2,
+            f"{transaction_lines[refnum_data_index].replace(REFNUM_TAG, '').strip()}",
+        )
+
+    if name_data_index == -1:
+        name_data_index = refnum_data_index + 1
+        transaction_lines.insert(refnum_data_index + 1, "BLANK\n")
+
+    memo_data = transaction_lines[memo_data_index].replace(MEMO_TAG, "").strip()
+    for item in bad_text:
+        memo_data = re.sub(re.escape(item), "", memo_data)
+
+    if len(memo_data) < 1:
+        memo_data = "NOTHING USEFUL"
+
+    name_data = transaction_lines[name_data_index].replace(NAME_TAG, "").strip()
+    transaction_lines[memo_data_index] = MEMO_TAG + name_data
+    transaction_lines[name_data_index] = (
+        NAME_TAG + memo_data[:maximum_nametag_line_length] + "\n"
+    )
+
+    if (
+        transaction_lines[name_data_index]
+        .replace(NAME_TAG, "")
+        .strip() == transaction_lines[memo_data_index].replace(MEMO_TAG, "").strip()
+    ):
+        transaction_lines[memo_data_index] = (
+            MEMO_TAG
+            + transaction_lines[refnum_data_index]
+            .replace(REFNUM_TAG, "")
+            .strip()
+        )
+        transaction_lines[name_data_index] = NAME_TAG + "COLLISION"
+
+    return transaction_lines
+
+def refactoring_clean_qbo_file(lines, bad_text):
+    maximum_nametag_line_length = 32
+    clean_file_lines = []
+
+    file_date, acct_number, clean_file_lines = parse_qbo_data(lines)
+
+    i = 0
+    while i < len(clean_file_lines):
+        if clean_file_lines[i].startswith("<STMTTRN>"):
+            transaction_lines = clean_file_lines[i:]
+            transaction_lines = clean_memo_and_name(
+                transaction_lines, bad_text, maximum_nametag_line_length
+            )
+            clean_file_lines[i:] = transaction_lines
+        i += 1
+
+    return clean_file_lines, file_date, acct_number
+
+
+
+"""
+
+"""Here are some suggested tests.
+
+import pytest
+from hypothesis import given, settings, strategies as st
+
+# Import your individual functions here
+
+# Define a strategy for generating QBO data lines
+qbo_data_strategy = st.lists(
+    st.text(
+        alphabet=st.characters(
+            whitelist_categories=("Lu", "Ll", "Nd", "Zs"),  # Letters, Numbers, Spaces
+            blacklist_characters=("<", ">", "\n"),
+        ),
+        min_size=1,
+        max_size=50,  # Adjust the maximum line length as needed
+    ),
+    min_size=1,
+    max_size=50,  # Adjust the number of lines generated as needed
+)
+
+# Define a strategy for generating bad_text
+bad_text_strategy = st.lists(st.text(min_size=1, max_size=10), min_size=0, max_size=5)
+
+@given(qbo_data=qbo_data_strategy, bad_text=bad_text_strategy)
+@settings(deadline=None)  # Disable deadline to allow longer test runs
+def test_parse_qbo_data_with_hypothesis(qbo_data, bad_text):
+    # Test the parse_qbo_data function with generated data
+    file_date, acct_number, clean_file_lines = parse_qbo_data(qbo_data)
+
+    # Perform assertions based on your requirements
+    # ...
+
+@given(qbo_data=qbo_data_strategy, bad_text=bad_text_strategy)
+@settings(deadline=None)  # Disable deadline to allow longer test runs
+def test_clean_memo_and_name_with_hypothesis(qbo_data, bad_text):
+    # Test the clean_memo_and_name function with generated data
+    transaction_lines = qbo_data  # Replace with appropriate data
+    maximum_nametag_line_length = 32  # Replace with the desired length
+
+    cleaned_memo, cleaned_name = clean_memo_and_name(
+        transaction_lines, bad_text, maximum_nametag_line_length
+    )
+
+    # Perform assertions based on your requirements
+    # ...
+
+@given(qbo_data=qbo_data_strategy, bad_text=bad_text_strategy)
+@settings(deadline=None)  # Disable deadline to allow longer test runs
+def test_swap_and_adjust_with_hypothesis(qbo_data, bad_text):
+    # Test the swap_and_adjust function with generated data
+    transaction_lines = qbo_data  # Replace with appropriate data
+    cleaned_memo = ""  # Replace with cleaned memo data
+    cleaned_name = ""  # Replace with cleaned name data
+
+    updated_transaction_lines = swap_and_adjust(
+        transaction_lines, cleaned_memo, cleaned_name
+    )
+
+    # Perform assertions based on your requirements
+    # ...
+
+if __name__ == "__main__":
+    pytest.main()
+
+
+"""

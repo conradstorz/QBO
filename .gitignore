@@ -10,6 +10,7 @@
 
 # local DB files
 *.json_db
+*.qbo
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
