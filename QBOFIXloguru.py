@@ -89,7 +89,7 @@ def mylogger(txt):
     Returns:
         nothing
     """
-    logger.info(txt.strip())
+    logger.debug(txt.strip())
 
 
 @logger.catch
@@ -124,7 +124,7 @@ def clean_qbo_file(lines, bad_text):
     while lines != []:
         # pop first line
         line = lines.pop(0)
-        logger.info(f"INPUT:{line.strip()}")
+        logger.debug(f"INPUT:{line.strip()}")
 
         # monitor data stream for date and acct number
         if line.startswith(QBO_FILE_DATE_TAG):
@@ -139,13 +139,13 @@ def clean_qbo_file(lines, bad_text):
 
         # monitor for transaction start
         if line.startswith(TRANS_START_TAG) == True:
-            logger.info(f"Transaction found...")
+            logger.debug(f"Transaction found...")
             # load transaction into temp storage
             transaction_lines = []
             while line.startswith(TRANS_END_TAG) == False:
                 transaction_lines.append(line)
                 line = lines.pop(0)
-                logger.info(f"INPUT:{line.strip()}")
+                logger.debug(f"INPUT:{line.strip()}")
 
             # find memo and name items in transaction
             memo_data_index = -1
@@ -153,18 +153,18 @@ def clean_qbo_file(lines, bad_text):
             refnum_data_index = -1
             for indx, item in enumerate(transaction_lines):
                 if item.startswith(MEMO_TAG):
-                    logger.info(f"MEMO line is index::{indx}")
+                    logger.debug(f"MEMO line is index::{indx}")
                     memo_data_index = indx
                 if item.startswith(NAME_TAG):
-                    logger.info(f"NAME line is index::{indx}")
+                    logger.debug(f"NAME line is index::{indx}")
                     name_data_index = indx
                 if item.startswith(REFNUM_TAG):
-                    logger.info(f"REFNUM line is index::{indx}")
+                    logger.debug(f"REFNUM line is index::{indx}")
                     refnum_data_index = indx
 
             # EDGE CASES
             if memo_data_index == -1:  # there is no memo line in the bank download
-                logger.info("MEMO is missing from the current transaction.")
+                logger.warning("MEMO is missing from the current transaction.")
                 memo_data_index = refnum_data_index + 2
                 transaction_lines.insert(
                     refnum_data_index + 2,
@@ -172,7 +172,7 @@ def clean_qbo_file(lines, bad_text):
                 )
                 
             if name_data_index == -1:  # This has never happened in my experience
-                logger.info("NAME is missing from the current transaction.")
+                logger.warning("NAME is missing from the current transaction.")
                 name_data_index = refnum_data_index + 1
                 transaction_lines.insert(refnum_data_index + 1, f"BLANK\n")
 
@@ -185,40 +185,40 @@ def clean_qbo_file(lines, bad_text):
                 # remove each occurance from the memo data
                 memo_data = Clean_Line(item, memo_data)
                 # EDGE CASE: do not allow memo to be empty
-            logger.info(f'ORIGINAL: {transaction_lines[memo_data_index].replace(MEMO_TAG, "").lstrip()}')
-            logger.info(f' CLEANED: {memo_data}')
+            logger.debug(f'ORIGINAL: {transaction_lines[memo_data_index].replace(MEMO_TAG, "").lstrip()}')
+            logger.debug(f' CLEANED: {memo_data}')
             if len(memo_data) < 1:
-                logger.info('NOTE: memo line contained no text after cleaning.')
+                logger.warning('NOTE: memo line contained no text after cleaning.')
                 memo_data = 'NOTHING USEFUL'
 
             # place name value into memo line because my bank puts them in the wrong places
             name_data = (
                 transaction_lines[name_data_index].replace(NAME_TAG, "").lstrip()
             )  # remove nametag
-            logger.info(f"Saving new memo:{name_data.strip()}")
+            logger.debug(f"Saving new memo:{name_data.strip()}")
             transaction_lines[memo_data_index] = (
                 MEMO_TAG + name_data
             )  # name data still has carriage return and does not need it added like the memo_data variable does.
 
             # place cleaned memo data into name line and truncate length to quickbooks limit
-            logger.info(f"Saving new name:{memo_data.strip()}")
+            logger.debug(f"Saving new name:{memo_data.strip()}")
             transaction_lines[name_data_index] = (
                 NAME_TAG + memo_data[:maximum_nametag_line_length] + "\n"
             )
 
             # EDGE CASE: If name and memo are equal set memo to refnum and name to "COLLISION".
             if transaction_lines[name_data_index].replace(NAME_TAG, "").lstrip() == transaction_lines[memo_data_index].replace(MEMO_TAG, ""):
-                logger.info(f'EDGE CASE found: name and memo are identical. {transaction_lines[name_data_index].replace(NAME_TAG, "").lstrip()}')
+                logger.debug(f'EDGE CASE found: name and memo are identical. {transaction_lines[name_data_index].replace(NAME_TAG, "").lstrip()}')
                 transaction_lines[memo_data_index] = (MEMO_TAG + transaction_lines[refnum_data_index].replace(REFNUM_TAG, '').lstrip())
                 transaction_lines[name_data_index] = (NAME_TAG + "COLLISION")
 
             # place transaction data into output list now
             for item in transaction_lines:
                 clean_file_lines.append(item)
-                logger.info(f"OUTPUT:{item.strip()}")
+                logger.debug(f"OUTPUT:{item.strip()}")
 
         # place data into output list
-        logger.info(f"OUTPUT:{line.strip()}")
+        logger.debug(f"OUTPUT:{line.strip()}")
         clean_file_lines.append(line)
 
     return (
@@ -264,7 +264,7 @@ def modify_QBO(QBO_records_list, originalfile_pathobj):
         logger.info(f"Success removing {originalfile_pathobj.name}")
 
     else:
-        logger.info(f"Sorry, I can not find {originalfile_pathobj.name} file.")
+        logger.warning(f"Sorry, I can not find {originalfile_pathobj.name} file.")
 
     return
 
@@ -337,7 +337,8 @@ def defineLoggers(filename):
 
 @logger.catch
 def Main():
-    defineLoggers(f"{RUNTIME_NAME}_{OS_FILENAME_SAFE_TIMESTR}")
+    # defineLoggers(f"{RUNTIME_NAME}_{OS_FILENAME_SAFE_TIMESTR}")
+    defineLoggers(f"{RUNTIME_NAME}")
 
     logger.info("Program Start.")  # log the start of the program
 
