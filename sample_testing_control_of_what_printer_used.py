@@ -4,10 +4,21 @@ It has been tested and is partially working.
 
 import win32print
 import win32ui
+
+import json
+# Custom function to serialize the dictionary excluding unserializable objects
+def custom_json_serializer(obj):
+    # usage example: pretty_dict = json.dumps(dict, default=custom_json_serializer, indent=4)
+    if isinstance(obj, (int, float, str, bool, list, tuple, dict, type(None))):
+        return obj
+    else:
+        return str(obj)
+    
 from openpyxl import load_workbook
 from pathlib import Path
 from loguru import logger
 
+""" ---future---
 # import my custom code
 from custom_loguru import defineLoggers
 from time_strings import LOCAL_NOW_STRING
@@ -20,6 +31,7 @@ print(f"Logging file: {LOGNAME}")
 
 # setup logging
 defineLoggers(LOGNAME)
+"""
 
 # Define the path to your Excel spreadsheet
 spreadsheet_path = 'Outputfile0.xlsx'
@@ -42,6 +54,10 @@ printer_handle = win32print.OpenPrinter(printer_name)
 # Set up the printer to print the worksheet
 printer_info = win32print.GetPrinter(printer_handle, 2)
 
+# Pretty print and log the dictionary item
+pretty_json = json.dumps(printer_info, default=custom_json_serializer, indent=4)
+logger.info(pretty_json)
+
 # Create a printer device context
 printer_dc = win32ui.CreateDC()
 printer_dc.CreatePrinterDC(printer_name)
@@ -57,10 +73,15 @@ printer_dc.TextOut(100, 100, sample_text)
 # Print the worksheet
 # You may need to adjust the positioning and size of the printed content
 # based on your specific requirements
-for row in worksheet.iter_rows():
-    for cell in row:
-        logger.info(f"Cell Value: {cell.value}")
-        printer_dc.TextOut(cell.column, cell.row, str(cell.value))
+try:
+    for row in worksheet.iter_rows():
+        for cell in row:
+            logger.debug(f"Cell Value: {cell.value}")
+            logger.debug(f"Cell Coordinates: ({cell.column}, {cell.row})")
+            printer_dc.TextOut(cell.column, cell.row, str(cell.value))
+except Exception as e:
+    print(f"Printing Error: {e}")
+
 
 # End the printing job
 printer_dc.EndPage()
