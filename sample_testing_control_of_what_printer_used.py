@@ -56,7 +56,7 @@ printer_info = win32print.GetPrinter(printer_handle, 2)
 
 # Pretty print and log the dictionary item
 pretty_json = json.dumps(printer_info, default=custom_json_serializer, indent=4)
-logger.info(pretty_json)
+logger.info(f'Printer details report:{pretty_json}')
 
 # Create a printer device context
 printer_dc = win32ui.CreateDC()
