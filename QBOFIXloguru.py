@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-""" qbo_updater / Modify Quickbooks bank downloads to improve importing accuracy
+""" Version 2024.1 qbo_updater / Modify Quickbooks bank downloads to improve importing accuracy
 """
 
 
@@ -120,6 +120,7 @@ def clean_qbo_file(lines, bad_text):
     NAME_TAG = "<NAME>"
     REFNUM_TAG = "<REFNUM>"
     clean_file_lines = []
+    logger.info(f"processing {len(lines)} lines...")
 
     while lines != []:
         # pop first line
@@ -180,7 +181,7 @@ def clean_qbo_file(lines, bad_text):
             memo_data = (
                 transaction_lines[memo_data_index].replace(MEMO_TAG, "").lstrip()
             )  # remove memotag
-            logger.info(f"Removing bad text from memo line...")
+            logger.debug(f"Removing bad text from memo line...")
             for item in bad_text:
                 # remove each occurance from the memo data
                 memo_data = Clean_Line(item, memo_data)
@@ -281,8 +282,10 @@ def process_QBO():
         original_records_list = read_base_file(file_pathobj)
 
         # we have a file, try to process
+        logger.info(f"file found to process: {file_pathobj.name}")
         modify_QBO(original_records_list, file_pathobj)
-
+    if names == []:
+        logger.info(f"no QBO files found in {QBO_DOWNLOAD_DIRECTORY} directory.")
     return
 
 
