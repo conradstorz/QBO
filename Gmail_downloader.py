@@ -4,6 +4,18 @@ import imaplib
 import email
 import os
 
+"""
+
+# Example usage:
+email_address = 'your_email@gmail.com'
+password = 'your_password'
+search_criteria = '(FROM "sender@example.com" SUBJECT "Your Subject" UNSEEN)'
+save_folder = 'path_to_save_attachments'
+
+download_attachments(email_address, password, search_criteria, save_folder)
+
+"""
+
 def download_attachments(email_address, password, search_criteria, save_folder):
     try:
         # Connect to Gmail server
@@ -46,10 +58,3 @@ def download_attachments(email_address, password, search_criteria, save_folder):
     
     except Exception as e:
         print(f"Error: {str(e)}")
-
-# Example usage:
-email_address = 'your_email@gmail.com'
-password = 'your_password'
-search_criteria = '(FROM "sender@example.com" SUBJECT "Your Subject" UNSEEN)'
-save_folder = 'path_to_save_attachments'
-download_attachments(email_address, password, search_criteria, save_folder)
