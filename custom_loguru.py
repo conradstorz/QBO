@@ -1,5 +1,6 @@
 from loguru import logger
 import datetime as dt
+import os
 
 @logger.catch
 def defineLoggers(filename):
