@@ -19,25 +19,28 @@ OUTPUT_DIRECTORY = "D:/Users/Conrad/Documents/"
 RUNTIME_NAME = Path(__file__).name
 RUNTIME_CWD = Path.cwd()
 LN = LOCAL_NOW_STRING()
-OS_FILENAME_SAFE_TIMESTR = "".join(i for i in LN if i not in "\/:*?<>|")
+OS_FILENAME_SAFE_TIMESTR = "".join(i for i in LN if i not in r"\:/*?<>|")
 QBO_DOWNLOAD_DIRECTORY = Path(BASE_DIRECTORY)
 QBO_MODIFIED_DIRECTORY = Path(OUTPUT_DIRECTORY)
 BAD_TEXT = [
     r"DEBIT +\d{4}",
-    "CKCD ",
-    "AC-",
+    "CKCD ",  # the space included here ensures that this string is not part of a bigger word
+    "AC-",  # no space here allows this substring to be removed from a string
     "POS DB ",
-    "POS ",
-    "-ONLINE",
-    "-ACH",
-    "DEBIT",
-    "CREDIT",
-    "ACH",
-    "MISCELLANEOUS",
-    "PREAUTHORIZED",
-    "PURCHASE TERMINAL",
-    "ATM MERCHANT",
-    "AUTOMATIC TRANSFER",
+    "POS ",  # 'pos' won't be removed from words like 'position'
+    "-ONLINE ",
+    "-ACH ",
+    "DEBIT ",
+    "CREDIT ",
+    "ACH ",  # possibly i need to consider how these strings are handled by the cleaning routine.
+    "MISCELLANEOUS ",  # 'ach ' would probably match 'reach ' and result in 're'
+    "PREAUTHORIZED ",
+    "PURCHASE ",
+    "TERMINAL ",
+    "ATM ",
+    "MERCHANT ",
+    "AUTOMATIC ",
+    "TRANSFER ",
 ]
 
 
@@ -72,8 +75,9 @@ def extract_transaction_details(transaction_lines):
         # Split the line at the first occurrence of ">" to separate the tag from its value
         parts = line.split(">", 1)
         if len(parts) == 2:
-            tag, value = parts[0][1:], parts[1]  # Remove the opening "<" from the tag
-            transaction_details[tag] = value.strip()
+            if parts[0].startswith('<'):  # is this a valid tag?
+                tag, value = parts[0][1:], parts[1]  # Remove the opening "<" from the tag
+                transaction_details[tag] = value.strip()
     logger.debug(transaction_details)
     return transaction_details
 
@@ -87,11 +91,14 @@ def process_transaction(transaction_lines):
     if 'MEMO' not in transaction_details:
         transaction_details['MEMO'] = 'No Memo'
     else:
-        # memo needs to be stripped of bad text
+        # memo needs to be stripped of bad text and truncated
         transaction_details['MEMO'] = truncate_name(preprocess_memo(transaction_details['MEMO']))
+    logger.debug(transaction_details)
     # Check for equality of name and memo
-    name = transaction_details.get('NAME', 'No Name')
-    memo = transaction_details.get('MEMO')
+    if 'NAME' not in transaction_details:
+        transaction_details['NAME'] = 'No Name'
+    name = transaction_details['NAME']
+    memo = transaction_details['MEMO']
     if name == memo == 'CHECK PAID':
         # Use checknum for name and refnum for memo if available
         checknum = transaction_details.get('CHECKNUM', 'No CheckNum')
@@ -100,8 +107,8 @@ def process_transaction(transaction_lines):
         transaction_details['MEMO'] = refnum
     else:
         # name and memo are different so we need to swap their values using the power of tuple unpacking
-        transaction_details['NAME'], transaction_details['MEMO'] = transaction_details['MEMO'], transaction_details['NAME']
-
+        transaction_details['NAME'], transaction_details['MEMO'] = transaction_details['MEMO'], transaction_details.get('NAME', 'No Name')
+    logger.debug(transaction_details)
     # Convert transaction_details back into a list of lines
     processed_lines = []
     for tag, value in transaction_details.items():
@@ -142,7 +149,7 @@ def process_qbo_lines(lines):
             # Lines not part of a transaction are added directly to the output
             modified_lines.append(line)
     logger.info(f"{xacts_found} transactions found.")
-    logger.debug(modified_lines)
+    logger.debug(modified_lines)  # TODO make this output more log friendly
     return modified_lines, qbo_file_date, account_number
 
 
