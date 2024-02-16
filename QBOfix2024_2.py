@@ -82,7 +82,6 @@ def extract_transaction_details(transaction_lines):
 def process_transaction(transaction_lines):
     """Process individual transactions, ensuring memo presence, checking name and memo equality,
     and reformatting back into a list of lines."""
-    logger.debug(transaction_lines)
     transaction_details = extract_transaction_details(transaction_lines)
     # Ensure there's a memo tag, add a default one if necessary
     if 'MEMO' not in transaction_details:
@@ -108,18 +107,17 @@ def process_transaction(transaction_lines):
     for tag, value in transaction_details.items():
         line = f"<{tag}>{value}\n"
         processed_lines.append(line)
-    logger.debug(processed_lines)
     return processed_lines
 
 
 @logger.catch
 def process_qbo_lines(lines):
-    logger.debug(lines)
     qbo_file_date = '19700101'  # default value incase no date found
     account_number = '42'  # default  
     modified_lines = []  # Stores the modified lines of the entire file
     transaction_lines = []  # Temporarily stores lines of the current transaction
     processing_transaction = False  # Flag to indicate if we're within a transaction block
+    xacts_found = 0  # initialize counter of transactions found
     for line in lines:
         line_stripped = line.strip()        
         # Process header lines to extract date and account number
@@ -129,6 +127,7 @@ def process_qbo_lines(lines):
             account_number = line_stripped.replace('<ACCTID>', '')        
         if line_stripped.startswith('<STMTTRN>'):
             processing_transaction = True  # Mark the start of a transaction
+            xacts_found += 1  # increment counter
             transaction_lines = [line]  # Start a new transaction block
         elif line_stripped.startswith('</STMTTRN>'):
             # End of transaction found
@@ -142,6 +141,7 @@ def process_qbo_lines(lines):
         else:
             # Lines not part of a transaction are added directly to the output
             modified_lines.append(line)
+    logger.info(f"{xacts_found} transactions found.")
     logger.debug(modified_lines)
     return modified_lines, qbo_file_date, account_number
 
@@ -161,7 +161,6 @@ def read_base_file(input_file):
         logger.warning(str(e))
         file_contents = []
     if file_contents != []:
-        logger.debug(file_contents)
         logger.info("File contents read successfully.")
     return file_contents
 
