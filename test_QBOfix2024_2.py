@@ -88,6 +88,8 @@ def test_lines_with_no_tags_or_values():
 
 
 from hypothesis import given, strategies as st
+from hypothesis.strategies import composite
+
 
 @given(st.lists(st.text()))
 def test_hypothesis_random_strings(input_lines):
@@ -96,18 +98,29 @@ def test_hypothesis_random_strings(input_lines):
     # Basic assertion: result should be a dictionary
     assert isinstance(result, dict)
     # You can add more detailed assertions based on the properties of your function's output
-"""
-# not ready yet
-@given(st.lists(st.text(min_size=3).map(lambda x: f"<{x}>"), min_size=1))
+
+
+@composite
+def unique_tag_value_pairs(draw):
+    # Generate a list of unique tags
+    unique_tags = draw(st.lists(st.text(min_size=1), min_size=1, unique=True))
+    # Generate a value for each tag
+    values = draw(st.lists(st.text(min_size=1), min_size=len(unique_tags)))
+    # Combine tags and values into the desired format
+    return [f"<{tag}>{value}" for tag, value in zip(unique_tags, values)]
+
+@given(unique_tag_value_pairs())
 def test_hypothesis_well_formatted_strings(input_lines):
     result = extract_transaction_details(input_lines)
-    # Every item in input_lines should result in an entry in the dictionary, even if the value is empty
-    assert len(result) == len(input_lines)
-    # Check that keys are correctly extracted without leading '<'
+    # Assert that the number of entries in the result matches the number of input lines
+    assert len(result) == len(input_lines), "The number of entries in the result should match the number of input lines"
+    # Check that each generated tag is present in the result and associated with the correct value
     for line in input_lines:
-        tag = line[1:line.find(">")]  # Extract tag from formatted string
-        assert tag in result
-"""
+        tag, value = line[1:].split(">", 1)
+        value = value.strip()  # Split on the first occurrence of ">" and strip
+        assert result.get(tag) == value, f"The tag {tag} should be associated with the value {value}"
+
+
 
 from QBOfix2024_2 import process_transaction  # Adjust the import as necessary
 
@@ -151,3 +164,19 @@ def test_process_transaction_with_random_input(transaction_lines):
     # Depending on what extract_transaction_details and preprocess_memo do, you might add:
     # - Assertions to check for the presence of expected tags
     # - Assertions to ensure no unexpected modifications to certain tag values
+
+
+
+from QBOfix2024_2 import process_qbo_lines 
+import pytest
+from unittest.mock import patch
+
+def test_process_qbo_lines_empty_input():
+    # Call the function with an empty list
+    modified_lines, qbo_file_date, account_number = process_qbo_lines([])
+
+    # Assertions to ensure the function behaves as expected with an empty input
+    assert modified_lines == [], "Expected modified_lines to be an empty list"
+    assert qbo_file_date == '19700101', "Expected default qbo_file_date to be '19700101'"
+    assert account_number == '42', "Expected default account_number to be '42'"
+
